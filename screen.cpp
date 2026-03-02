@@ -152,7 +152,7 @@ void Screen::setMouseImage(SDL_Surface *image)
         SDL_FreeSurface(mouseImage);
         throw Exception(L"Error creating buffer surface");
     }
-    SDL_SetColorKey(mouseImage, SDL_SRCCOLORKEY, 
+    SDL_SetColorKey(mouseImage, SDL_TRUE, 
             SDL_MapRGB(mouseImage->format, 0, 0, 0));
 }
 

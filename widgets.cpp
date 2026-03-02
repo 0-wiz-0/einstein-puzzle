@@ -117,7 +117,7 @@ void TileWidget::rescale()
         
         if (transparent)
         {
-            SDL_SetColorKey(sImage, SDL_SRCCOLORKEY, getCornerPixel(image));
+            SDL_SetColorKey(sImage, SDL_TRUE, getCornerPixel(image));
         }
     }
 }
@@ -163,7 +163,7 @@ void HighlightableWidget::rescale()
     
         if (transparent)
         {
-            SDL_SetColorKey(sHighlighted, SDL_SRCCOLORKEY, getCornerPixel(highlighted));
+            SDL_SetColorKey(sHighlighted, SDL_TRUE, getCornerPixel(highlighted));
         }
     }
 }
@@ -312,8 +312,8 @@ Button::Button(int x, int y, int w, int h, Font *font,
     }
     
     highlighted = adjustBrightness(image, 1.5, false);
-    SDL_SetColorKey(image, SDL_SRCCOLORKEY, getCornerPixel(image));
-    SDL_SetColorKey(highlighted, SDL_SRCCOLORKEY, getCornerPixel(highlighted));
+    SDL_SetColorKey(image, SDL_TRUE, getCornerPixel(image));
+    SDL_SetColorKey(highlighted, SDL_TRUE, getCornerPixel(highlighted));
     
     command = cmd;
 }

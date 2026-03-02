@@ -52,7 +52,7 @@ static void initScreen()
     screen.initCursors();
     
     SDL_Surface *mouse = loadImage(L"cursor.bmp");
-    SDL_SetColorKey(mouse, SDL_SRCCOLORKEY, SDL_MapRGB(mouse->format, 0, 0, 0));
+    SDL_SetColorKey(mouse, SDL_TRUE, SDL_MapRGB(mouse->format, 0, 0, 0));
     screen.setMouseImage(mouse);
     SDL_FreeSurface(mouse);
     SDL_WM_SetCaption("Einstein", nullptr);
