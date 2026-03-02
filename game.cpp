@@ -317,7 +317,7 @@ class CheatAccel: public Widget
         }
 
     public:
-        bool onKeyDown(SDLKey key, unsigned char ch) override {
+        bool onKeyDown(SDL_Keycode key, unsigned char ch) override {
             if ((key >= SDLK_a) && (key <= SDLK_z)) {
                 const wchar_t s = L'a' + key - SDLK_a;
                 typed += s;

@@ -354,14 +354,14 @@ void Button::handleClick()
 //////////////////////////////////////////////////////////////////
 
 
-KeyAccel::KeyAccel(SDLKey sym, Command *cmd)
+KeyAccel::KeyAccel(SDL_Keycode sym, Command *cmd)
 {
     command = cmd;
     key = sym;
 }
 
 
-bool KeyAccel::onKeyDown(SDLKey k, unsigned char ch)
+bool KeyAccel::onKeyDown(SDL_Keycode k, unsigned char ch)
 {
     if (key == k) {
         if (command)
@@ -574,7 +574,7 @@ AnyKeyAccel::AnyKeyAccel(Command *cmd)
 
 AnyKeyAccel::~AnyKeyAccel() = default;
 
-bool AnyKeyAccel::onKeyDown(SDLKey key, unsigned char ch)
+bool AnyKeyAccel::onKeyDown(SDL_Keycode key, unsigned char ch)
 {
     if (((key >= SDLK_NUMLOCK) && (key <= SDLK_COMPOSE)) || 
             (key == SDLK_TAB) || (key == SDLK_UNKNOWN))
@@ -800,7 +800,7 @@ void InputField::onTimer()
 }
 
 
-bool InputField::onKeyDown(SDLKey key, unsigned char translatedChar)
+bool InputField::onKeyDown(SDL_Keycode key, unsigned char translatedChar)
 {
     switch (key) {
         case SDLK_BACKSPACE:
