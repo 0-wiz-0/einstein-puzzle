@@ -81,6 +81,7 @@ void Screen::setMode(bool isFullScreen)
 void Screen::applyMode()
 {
     int flags = SDL_SWSURFACE /*| SDL_OPENGL*/;
+    SDL_WM_SetCaption("Einstein", nullptr);
     if (!screen)
     {
         screen = SDL_SetVideoMode(0, 0, 24, flags);
