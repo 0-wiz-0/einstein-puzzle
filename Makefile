@@ -25,9 +25,9 @@ $(shell mkdir -p $(DEPDIR) >/dev/null)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
 
 ifeq ($(OS),Windows_NT)
-	CXXFLAGS=-Wall $(OPTIMIZE) $(DEBUG) `sdl-config --cflags` -mwindows -fpermissive
-	LNFLAGS=`sdl-config --libs` -lz -lSDL_mixer -lSDL_ttf -lfreetype
-	LIBS=`sdl-config --libs`
+	CXXFLAGS=-Wall $(OPTIMIZE) $(DEBUG) `sdl2-config --cflags` -mwindows -fpermissive
+	LNFLAGS=`sdl2-config --libs` -lz -lSDL2_mixer -lSDL2_ttf -lfreetype
+	LIBS=`sdl2-config --libs`
 	EXE=.exe
 else
 	EXE=
@@ -36,11 +36,11 @@ else
 	PROFILER=#-pg
 	LIBS=
 	ifeq ($(UNAME_S),Darwin)
-		CXXFLAGS=-pipe -Wall $(OPTIMIZE) $(DEBUG) -I/Library/Frameworks/SDL.framework/Headers/ -I/Library/Frameworks/SDL_ttf.framework/Headers/ -I/Library/Frameworks/SDL_mixer.framework/Headers/ -DPREFIX=L\"$(PREFIX)\" $(PROFILER)
-		LNFLAGS=-pipe -framework Cocoa -framework SDL_ttf -framework SDL -framework SDL_mixer -lSDLmain -lz  $(PROFILER)
+		CXXFLAGS=-pipe -Wall $(OPTIMIZE) $(DEBUG) -I/Library/Frameworks/SDL2.framework/Headers/ -I/Library/Frameworks/SDL2_ttf.framework/Headers/ -I/Library/Frameworks/SDL2_mixer.framework/Headers/ -DPREFIX=L\"$(PREFIX)\" $(PROFILER)
+		LNFLAGS=-pipe -framework Cocoa -framework SDL2_ttf -framework SDL2 -framework SDL2_mixer -lSDL2main -lz  $(PROFILER)
 	else
-		CXXFLAGS=-pipe -Wall $(OPTIMIZE) $(DEBUG) `sdl-config --cflags` -DPREFIX=L\"$(PREFIX)\" $(PROFILER)
-		LNFLAGS=-pipe `sdl-config --libs` -lz -lSDL_mixer -lSDL_ttf -lfreetype $(PROFILER)
+		CXXFLAGS=-pipe -Wall $(OPTIMIZE) $(DEBUG) `sdl2-config --cflags` -DPREFIX=L\"$(PREFIX)\" $(PROFILER)
+		LNFLAGS=-pipe `sdl2-config --libs` -lz -lSDL2_mixer -lSDL2_ttf -lfreetype $(PROFILER)
 		INSTALL=install
 	endif
 endif
