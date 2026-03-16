@@ -49,7 +49,7 @@ void Puzzle::reset()
     win = false;
 
     int x, y;
-    SDL_GetMouseState(&x, &y);
+    screen.getMouse(&x, &y);
     getCellNo(x, y, hCol, hRow, subHNo);
 }
 

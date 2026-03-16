@@ -58,12 +58,13 @@ class Screen
 {
     private:
         SDL_Surface *screen;
+        SDL_Window *window;
+        SDL_Renderer *renderer;
+        SDL_Texture *texture;
         float scale;
         bool fullScreen;
         int screenSize;
-        SDL_Surface *mouseImage;
-        SDL_Surface *mouseSave;
-        std::list<SDL_Rect> regions;
+        SDL_Cursor *mouseCursor;
         bool mouseVisible;
         SDL_Rect *regionsList;
         int maxRegionsList;
@@ -86,7 +87,8 @@ class Screen
         void updateMouse();
         void flush();
         void addRegionToUpdate(int x, int y, int w, int h);
-        SDL_Surface* getSurface() { return screen; }
+        SDL_Surface *getSurface() { return screen; }
+        SDL_Window *getWindow() { return window; };
         void draw(int x, int y, SDL_Surface *surface);
         void drawScaled(int x, int y, SDL_Surface *surface);
         void setCursor(bool nice);
@@ -99,6 +101,8 @@ class Screen
         void setSize(int screenSize);
         std::vector<std::wstring> getModeList();
         float getScale();
+        void getMouse(int* x, int* y);
+        void convertMouse(int *x, int *y);
 };
 
 

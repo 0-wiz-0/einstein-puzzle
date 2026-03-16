@@ -441,36 +441,31 @@ void Area::setVisible(Widget *widget, bool visible)
 
 void Area::handleEvent(const SDL_Event &event)
 {
+    int x, y;
+    screen.getMouse(&x, &y);
     switch (event.type) {
         case SDL_MOUSEBUTTONDOWN:
             for (auto& widget : widgets)
-                if (widget->onMouseButtonDown(event.button.button, 
-                            event.button.x, event.button.y))
+	        if (widget->onMouseButtonDown(event.button.button, x, y))
                     return;
             break;
         
         case SDL_MOUSEBUTTONUP:
             for (auto& widget : widgets)
-                if (widget->onMouseButtonUp(event.button.button, 
-                            event.button.x, event.button.y))
+	        if (widget->onMouseButtonUp(event.button.button, x, y))
                     return;
             break;
         
         case SDL_MOUSEMOTION:
             for (auto& widget : widgets)
-                if (widget->onMouseMove(event.motion.x, event.motion.y))
+	      if (widget->onMouseMove(x, y))
                     return;
-            break;
-        
-        case SDL_VIDEOEXPOSE:
-            for (auto& widget : widgets)
-                widget->draw();
             break;
         
         case SDL_KEYDOWN:
             for (auto& widget : widgets)
                 if (widget->onKeyDown(event.key.keysym.sym, 
-                            (unsigned char)event.key.keysym.unicode))
+                            (unsigned char)event.key.keysym.sym))
                     return;
             break;
         
@@ -545,7 +540,9 @@ void Area::setTimer(Uint32 interval, TimerHandler *t)
 void Area::updateMouse()
 {
     int x, y;
-    SDL_GetMouseState(&x, &y);
+    screen.getMouse(&x, &y);
+
+    //    screen.getMouse(&x, &y);
     
     for (auto& widget : widgets)
         if (widget->onMouseMove(x, y))
@@ -576,7 +573,7 @@ AnyKeyAccel::~AnyKeyAccel() = default;
 
 bool AnyKeyAccel::onKeyDown(SDL_Keycode key, unsigned char ch)
 {
-    if (((key >= SDLK_NUMLOCK) && (key <= SDLK_COMPOSE)) || 
+    if (((key >= SDLK_PRINTSCREEN) && (key <= SDLK_NUMLOCKCLEAR)) ||
             (key == SDLK_TAB) || (key == SDLK_UNKNOWN))
         return false;
 
@@ -744,13 +741,10 @@ InputField::InputField(int x, int y, int w, int h, const std::wstring &backgroun
     blue = b;
     font = f;
     moveCursor(text.length());
-    SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-    SDL_EnableUNICODE(1);
 }
 
 InputField::~InputField()
 {
-    SDL_EnableKeyRepeat(0, 0);
 }
 
 void InputField::draw()
@@ -920,10 +914,11 @@ Picture::Picture(int x, int y, const std::wstring &name, bool transparent):
 }
 
 
-Picture::Picture(int x, int y, SDL_Surface *img):
-    TileWidget(x, y, img->w, img->h)
+Picture::Picture(int x, int y, SDL_Surface *img) : TileWidget(x, y, img->w, img->h)
 {
-    image = SDL_DisplayFormat(img);
+    image = img;
+    img = SDL_CreateRGBSurface(SDL_SWSURFACE, img->w, img->h,
+			       24, 0x00FF0000, 0x0000FF00, 0x000000FF, 0/*0xFF000000*/);
 }
 
 
@@ -982,9 +977,7 @@ void Slider::createSlider(int size)
     image = s;
     
     activeSlider = adjustBrightness(image, 1.5, false);
-    slider = SDL_DisplayFormat(image);
-    
-    SDL_FreeSurface(image);
+    slider = image;
 }
 
 void Slider::changeValue(float v)

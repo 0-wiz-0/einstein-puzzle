@@ -132,20 +132,16 @@ SDL_Surface* loadImage(const std::wstring &name, bool transparent)
     void *bmp = resources->getRef(name, size);
     if (! bmp)
         throw Exception(name + L" is not found");
+
     SDL_RWops *op = SDL_RWFromMem(bmp, size);
     SDL_Surface *s = SDL_LoadBMP_RW(op, 0);
     SDL_FreeRW(op);
     resources->delRef(bmp);
     if (! s)
         throw Exception(L"Error loading " + name);
-    SDL_Surface *screenS = SDL_DisplayFormat(s);
-    SDL_FreeSurface(s);
-    if (! screenS)
-        throw Exception(L"Error translating to screen format " + name);
-    
-    if (transparent)
-        SDL_SetColorKey(screenS, SDL_TRUE, getCornerPixel(screenS));
-    return screenS;
+    if(transparent)
+        SDL_SetColorKey(s, SDL_TRUE, getCornerPixel(s));
+    return s;
 }
 
 
@@ -290,11 +286,11 @@ void adjustBrightness(SDL_Surface *image, int x, int y, double k)
 SDL_Surface* adjustBrightness(SDL_Surface *image, double k, bool transparent)
 {
     setGamma(k);
-    
-    SDL_Surface *s = SDL_DisplayFormat(image);
-    if (! s)
-        throw Exception(L"Error converting image to display format");
-    
+
+    SDL_Surface *s = SDL_CreateRGBSurface(0, image->w, image->h, 32,
+        0x00ff0000,0x0000ff00, 0x000000ff, 0xff000000);
+    SDL_BlitSurface(image, NULL, s, NULL);
+
     SDL_LockSurface(s);
     
     Uint8 r, g, b;
