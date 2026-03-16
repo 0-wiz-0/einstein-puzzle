@@ -18,93 +18,84 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __SCREEN_H__
 #define __SCREEN_H__
 
-
+#include <SDL.h>
 #include <list>
 #include <string>
 #include <vector>
-#include <SDL.h>
 
+class VideoMode {
+  private:
+    int width;
+    int height;
+    int bpp;
+    bool fullScreen;
 
-class VideoMode
-{
-    private:
-        int width;
-        int height;
-        int bpp;
-        bool fullScreen;
+  public:
+    VideoMode(int w, int h, int bpp, bool fullscreen) {
+        width = w;
+        height = h;
+        this->bpp = bpp;
+        this->fullScreen = fullscreen;
+    }
 
-    public:
-        VideoMode(int w, int h, int bpp, bool fullscreen) 
-        { 
-            width = w; 
-            height = h; 
-            this->bpp = bpp; 
-            this->fullScreen = fullscreen;
-        }
-
-    public:
-        int getWidth() const { return width; }
-        int getHeight() const { return height; }
-        int getBpp() const { return bpp; }
-        bool isFullScreen() const { return fullScreen; }
+  public:
+    int getWidth() const { return width; }
+    int getHeight() const { return height; }
+    int getBpp() const { return bpp; }
+    bool isFullScreen() const { return fullScreen; }
 };
 
+class Screen {
+  private:
+    SDL_Surface *screen;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Texture *texture;
+    float scale;
+    bool fullScreen;
+    int screenSize;
+    SDL_Cursor *mouseCursor;
+    bool mouseVisible;
+    SDL_Rect *regionsList;
+    int maxRegionsList;
+    int saveX, saveY;
+    bool niceCursor;
+    SDL_Cursor *cursor, *emptyCursor;
+    void applyMode();
 
-class Screen
-{
-    private:
-        SDL_Surface *screen;
-        SDL_Window *window;
-        SDL_Renderer *renderer;
-        SDL_Texture *texture;
-        float scale;
-        bool fullScreen;
-        int screenSize;
-        SDL_Cursor *mouseCursor;
-        bool mouseVisible;
-        SDL_Rect *regionsList;
-        int maxRegionsList;
-        int saveX, saveY;
-        bool niceCursor;
-        SDL_Cursor *cursor, *emptyCursor;
-        void applyMode();
-    
-    public:
-        Screen();
-        ~Screen();
+  public:
+    Screen();
+    ~Screen();
 
-    public:
-        int getWidth() const;
-        int getHeight() const;
-        void setMode(bool fullScreen);
-        void setMouseImage(SDL_Surface *image);
-        void hideMouse();
-        void showMouse();
-        void updateMouse();
-        void flush();
-        void addRegionToUpdate(int x, int y, int w, int h);
-        SDL_Surface *getSurface() { return screen; }
-        SDL_Window *getWindow() { return window; };
-        void draw(int x, int y, SDL_Surface *surface);
-        void drawScaled(int x, int y, SDL_Surface *surface);
-        void setCursor(bool nice);
-        void initCursors();
-        void doneCursors();
-        SDL_Surface* createSubimage(int x, int y, int width, int height);
-        void drawWallpaper(const std::wstring &name);
-        SDL_PixelFormat* getFormat();
-        void setClipRect(SDL_Rect* rect);
-        void setSize(int screenSize);
-        std::vector<std::wstring> getModeList();
-        float getScale();
-        void getMouse(int* x, int* y);
-        void convertMouse(int *x, int *y);
+  public:
+    int getWidth() const;
+    int getHeight() const;
+    void setMode(bool fullScreen);
+    void setMouseImage(SDL_Surface *image);
+    void hideMouse();
+    void showMouse();
+    void updateMouse();
+    void flush();
+    void addRegionToUpdate(int x, int y, int w, int h);
+    SDL_Surface *getSurface() { return screen; }
+    SDL_Window *getWindow() { return window; };
+    void draw(int x, int y, SDL_Surface *surface);
+    void drawScaled(int x, int y, SDL_Surface *surface);
+    void setCursor(bool nice);
+    void initCursors();
+    void doneCursors();
+    SDL_Surface *createSubimage(int x, int y, int width, int height);
+    void drawWallpaper(const std::wstring &name);
+    SDL_PixelFormat *getFormat();
+    void setClipRect(SDL_Rect *rect);
+    void setSize(int screenSize);
+    std::vector<std::wstring> getModeList();
+    float getScale();
+    void getMouse(int *x, int *y);
+    void convertMouse(int *x, int *y);
 };
-
 
 #endif
-

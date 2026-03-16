@@ -16,30 +16,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "format.h"
 
 #include "msgformatter.h"
 
-
 FormatRegistry formatRegistry;
 
-
-FormatRegistry::FormatRegistry()
-{
+FormatRegistry::FormatRegistry() {
     formatters[L"messages"] = new MsgFormatter();
 }
 
-
-FormatRegistry::~FormatRegistry()
-{
-    for (auto& formatter : formatters)
+FormatRegistry::~FormatRegistry() {
+    for (auto &formatter : formatters) {
         delete formatter.second;
+    }
 }
 
-
-Formatter* FormatRegistry::get(const std::wstring &name)
-{
+Formatter *FormatRegistry::get(const std::wstring &name) {
     return formatters[name];
 }
-

@@ -18,7 +18,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "descr.h"
 #include "game.h"
 #include "main.h"
@@ -29,167 +28,150 @@
 #include "utils.h"
 #include "widgets.h"
 
-
-class MenuBackground: public Area
-{
-    public:
-        MenuBackground();
+class MenuBackground : public Area {
+  public:
+    MenuBackground();
 };
 
-
-MenuBackground::MenuBackground()
-{
+MenuBackground::MenuBackground() {
     add(new Picture(0, 0, L"nova.bmp"));
     std::wstring s(msg(L"einsteinFlowix"));
     add(new ManagedLabel(L"nova.ttf", 28, 0, 30, screen.getWidth(), 0,
-                            Label::ALIGN_CENTER, Label::ALIGN_TOP, 255, 255, 255, s));
-    
+                         Label::ALIGN_CENTER, Label::ALIGN_TOP, 255, 255, 255,
+                         s));
+
     s = L"http://games.flowix.com";
     add(new ManagedLabel(L"luximb.ttf", 16, 0, 60, screen.getWidth(), 0,
-                            Label::ALIGN_CENTER, Label::ALIGN_TOP, 255, 255, 0, s));
+                         Label::ALIGN_CENTER, Label::ALIGN_TOP, 255, 255, 0,
+                         s));
 }
 
+class NewGameCommand : public Command {
+  private:
+    Area *area;
 
-class NewGameCommand: public Command
-{
-    private:
-        Area *area;
-    
-    public:
-        explicit NewGameCommand(Area *a) { area = a; }
+  public:
+    explicit NewGameCommand(Area *a) { area = a; }
 
-        void doAction() override {
-            Game game;
-            game.run();
-            area->updateMouse();
-            area->draw();
-        }
+    void doAction() override {
+        Game game;
+        game.run();
+        area->updateMouse();
+        area->draw();
+    }
 };
 
+class LoadGameCommand : public Command {
+  private:
+    Area *area;
 
-class LoadGameCommand: public Command
-{
-    private:
-        Area *area;
-    
-    public:
-        explicit LoadGameCommand(Area *a) { area = a; }
+  public:
+    explicit LoadGameCommand(Area *a) { area = a; }
 
-        void doAction() override {
-            Game *game = loadGame(area);
-            if (game) {
-                game->run();
-                delete game;
-            }
-            area->updateMouse();
-            area->draw();
+    void doAction() override {
+        Game *game = loadGame(area);
+        if (game) {
+            game->run();
+            delete game;
         }
+        area->updateMouse();
+        area->draw();
+    }
 };
 
+class TopScoresCommand : public Command {
+  private:
+    Area *area;
 
+  public:
+    explicit TopScoresCommand(Area *a) { area = a; }
 
-class TopScoresCommand: public Command
-{
-    private:
-        Area *area;
-    
-    public:
-        explicit TopScoresCommand(Area *a) { area = a; }
-
-        void doAction() override {
-            TopScores scores;
-            showScoresWindow(area, &scores);
-            area->updateMouse();
-            area->draw();
-        }
+    void doAction() override {
+        TopScores scores;
+        showScoresWindow(area, &scores);
+        area->updateMouse();
+        area->draw();
+    }
 };
 
+class RulesCommand : public Command {
+  private:
+    Area *area;
 
-class RulesCommand: public Command
-{
-    private:
-        Area *area;
-    
-    public:
-        explicit RulesCommand(Area *a) { area = a; }
+  public:
+    explicit RulesCommand(Area *a) { area = a; }
 
-        void doAction() override {
-            showDescription(area);
-            area->updateMouse();
-            area->draw();
-        }
+    void doAction() override {
+        showDescription(area);
+        area->updateMouse();
+        area->draw();
+    }
 };
 
+class OptionsCommand : public Command {
+  private:
+    Area *area;
 
-class OptionsCommand: public Command
-{
-    private:
-        Area *area;
-    
-    public:
-        explicit OptionsCommand(Area *a) { area = a; }
+  public:
+    explicit OptionsCommand(Area *a) { area = a; }
 
-        void doAction() override {
-            showOptionsWindow(area);
-            area->updateMouse();
-            area->draw();
-        }
+    void doAction() override {
+        showOptionsWindow(area);
+        area->updateMouse();
+        area->draw();
+    }
 };
 
+class AboutCommand : public Command {
+  private:
+    Area *parentArea;
 
-class AboutCommand: public Command
-{
-    private:
-        Area *parentArea;
-    
-    public:
-        explicit AboutCommand(Area *a) { parentArea = a; }
+  public:
+    explicit AboutCommand(Area *a) { parentArea = a; }
 
-        void doAction() override {
-            Area area;
-            Font titleFont(L"nova.ttf", 26);
-            Font font(L"laudcn2.ttf", 14);
-            Font urlFont(L"luximb.ttf", 16);
+    void doAction() override {
+        Area area;
+        Font titleFont(L"nova.ttf", 26);
+        Font font(L"laudcn2.ttf", 14);
+        Font urlFont(L"luximb.ttf", 16);
 
-#define LABEL(pos, c, f, text) area.add(new Label(&f, 220, pos, 360, 20, \
-            Label::ALIGN_CENTER, Label::ALIGN_MIDDLE, 255,255,c, text));
-            area.add(parentArea);
-            area.add(new Window(220, 160, 360, 280, L"blue.bmp"));
-            area.add(new Label(&titleFont, 250, 165, 300, 40, Label::ALIGN_CENTER,
-                        Label::ALIGN_MIDDLE, 255,255,0, msg(L"about")));
-            LABEL(240, 255, font, msg(L"einsteinPuzzle"))
-            LABEL(260, 255, font, msg(L"version"))
-            LABEL(280, 255, font, msg(L"copyright"))
-            LABEL(330, 0, urlFont, L"http://games.flowix.com")
+#define LABEL(pos, c, f, text)                                     \
+    area.add(new Label(&f, 220, pos, 360, 20, Label::ALIGN_CENTER, \
+                       Label::ALIGN_MIDDLE, 255, 255, c, text));
+        area.add(parentArea);
+        area.add(new Window(220, 160, 360, 280, L"blue.bmp"));
+        area.add(new Label(&titleFont, 250, 165, 300, 40, Label::ALIGN_CENTER,
+                           Label::ALIGN_MIDDLE, 255, 255, 0, msg(L"about")));
+        LABEL(240, 255, font, msg(L"einsteinPuzzle"))
+        LABEL(260, 255, font, msg(L"version"))
+        LABEL(280, 255, font, msg(L"copyright"))
+        LABEL(330, 0, urlFont, L"http://games.flowix.com")
 #undef LABEL
-            ExitCommand exitCmd(area);
-            area.add(new Button(360, 400, 80, 25, &font, 255,255,0, L"blue.bmp", 
-                        msg(L"ok"), &exitCmd));
-            area.add(new KeyAccel(SDLK_ESCAPE, &exitCmd));
-            area.add(new KeyAccel(SDLK_RETURN, &exitCmd));
-            area.run();
+        ExitCommand exitCmd(area);
+        area.add(new Button(360, 400, 80, 25, &font, 255, 255, 0, L"blue.bmp",
+                            msg(L"ok"), &exitCmd));
+        area.add(new KeyAccel(SDLK_ESCAPE, &exitCmd));
+        area.add(new KeyAccel(SDLK_RETURN, &exitCmd));
+        area.run();
 
-            parentArea->updateMouse();
-            parentArea->draw();
-        }
+        parentArea->updateMouse();
+        parentArea->draw();
+    }
 };
 
-
-static Button* menuButton(int y, Font *font, const std::wstring &text, 
-        Command *cmd=nullptr)
-{
-    return new Button(550, y, 220, 30, font, 0,240,240, 30,255,255, text, cmd);
+static Button *menuButton(int y, Font *font, const std::wstring &text,
+                          Command *cmd = nullptr) {
+    return new Button(550, y, 220, 30, font, 0, 240, 240, 30, 255, 255, text,
+                      cmd);
 }
 
-
-void menu()
-{
+void menu() {
     Area area;
     Font font(L"laudcn2.ttf", 20);
 
     area.add(new MenuBackground());
     area.draw();
-        
+
     NewGameCommand newGameCmd(&area);
     area.add(menuButton(340, &font, msg(L"newGame"), &newGameCmd));
     LoadGameCommand loadGameCmd(&area);
@@ -205,11 +187,10 @@ void menu()
     ExitCommand exitMenuCmd(area);
     area.add(menuButton(520, &font, msg(L"exit"), &exitMenuCmd));
     area.add(new KeyAccel(SDLK_ESCAPE, &exitMenuCmd));
-    
+
     area.draw();
     screen.addRegionToUpdate(0, 0, screen.getWidth(), screen.getHeight());
     screen.flush();
 
     area.run();
 }
-

@@ -16,35 +16,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __TABLESTORAGE_H__
 #define __TABLESTORAGE_H__
-
 
 #include "storage.h"
 #include "table.h"
 
+class TableStorage : public Storage {
+  private:
+    Table table;
 
-class TableStorage: public Storage
-{
-    private:
-        Table table;
-    
-    public:
-        TableStorage();
-        virtual ~TableStorage();
+  public:
+    TableStorage();
+    virtual ~TableStorage();
 
-    public:
-        int get(const std::wstring &name, int dflt) override;
-        std::wstring get(const std::wstring &name, const std::wstring &dflt) override;
-        void set(const std::wstring &name, int value) override;
-        void set(const std::wstring &name, const std::wstring &value) override;
-        void flush() override;
+  public:
+    int get(const std::wstring &name, int dflt) override;
+    std::wstring get(const std::wstring &name,
+                     const std::wstring &dflt) override;
+    void set(const std::wstring &name, int value) override;
+    void set(const std::wstring &name, const std::wstring &value) override;
+    void flush() override;
 
-    private:
-        std::wstring getFileName();
+  private:
+    std::wstring getFileName();
 };
 
-
 #endif
-

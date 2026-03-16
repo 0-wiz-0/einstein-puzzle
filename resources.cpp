@@ -18,7 +18,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "resources.h"
 
 #include "convert.h"
@@ -33,9 +32,7 @@
 #include <sys/types.h>
 #include <zlib.h>
 
-
 ResourcesCollection *resources = nullptr;
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -43,44 +40,41 @@ ResourcesCollection *resources = nullptr;
 //
 ///////////////////////////////////////////////////////////////////
 
+class UnpackedResourceStream : public ResourceStream {
+  private:
+    std::ifstream &stream;
+    size_t size;
+    long offset;
+    long pos;
 
-class UnpackedResourceStream: public ResourceStream
-{
-    private:
-        std::ifstream &stream;
-        size_t size;
-        long offset;
-        long pos;
-    
-    public:
-        UnpackedResourceStream(std::ifstream &stream, long offset, 
-                size_t size);
+  public:
+    UnpackedResourceStream(std::ifstream &stream, long offset, size_t size);
 
-    public:
-        size_t getSize() override { return size; }
-        void read(char *buffer, size_t size) override;
-        long getPos() override { return pos; }
+  public:
+    size_t getSize() override { return size; }
+    void read(char *buffer, size_t size) override;
+    long getPos() override { return pos; }
 };
 
-UnpackedResourceStream::UnpackedResourceStream(std::ifstream &s, 
-        long off, size_t sz): stream(s)
-{
+UnpackedResourceStream::UnpackedResourceStream(std::ifstream &s, long off,
+                                               size_t sz)
+    : stream(s) {
     offset = off;
     size = sz;
     pos = 0;
 }
 
-void UnpackedResourceStream::read(char *buffer, size_t sz)
-{
-    if (! buffer)
+void UnpackedResourceStream::read(char *buffer, size_t sz) {
+    if (!buffer) {
         throw Exception(L"Invalid buffer in ResourceStream");
-    if (sz + pos > size)
+    }
+    if (sz + pos > size) {
         throw Exception(L"Attempt of reading after resource end");
+    }
     stream.seekg(offset + pos, std::ios::beg);
     stream.read(buffer, sz);
     pos += sz;
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -88,47 +82,43 @@ void UnpackedResourceStream::read(char *buffer, size_t sz)
 //
 ///////////////////////////////////////////////////////////////////
 
+class MemoryResourceStream : public ResourceStream {
+  private:
+    char *data;
+    size_t size;
+    ResVariant *resource;
+    long pos;
 
-class MemoryResourceStream: public ResourceStream
-{
-    private:
-        char *data;
-        size_t size;
-        ResVariant *resource;
-        long pos;
-    
-    public:
-        explicit MemoryResourceStream(ResVariant *resource);
-        virtual ~MemoryResourceStream();
+  public:
+    explicit MemoryResourceStream(ResVariant *resource);
+    virtual ~MemoryResourceStream();
 
-    public:
-        size_t getSize() override { return size; }
-        void read(char *buffer, size_t size) override;
-        long getPos() override { return pos; }
+  public:
+    size_t getSize() override { return size; }
+    void read(char *buffer, size_t size) override;
+    long getPos() override { return pos; }
 };
 
-MemoryResourceStream::MemoryResourceStream(ResVariant *res)
-{
+MemoryResourceStream::MemoryResourceStream(ResVariant *res) {
     resource = res;
-    data = (char*)res->getRef(size);
+    data = (char *)res->getRef(size);
     pos = 0;
 }
 
-MemoryResourceStream::~MemoryResourceStream()
-{
+MemoryResourceStream::~MemoryResourceStream() {
     resource->delRef(data);
 }
 
-void MemoryResourceStream::read(char *buffer, size_t sz)
-{
-    if (! buffer)
+void MemoryResourceStream::read(char *buffer, size_t sz) {
+    if (!buffer) {
         throw Exception(L"Invalid buffer in ResourceStream");
-    if (sz + pos > size)
+    }
+    if (sz + pos > size) {
         throw Exception(L"Attempt of reading after resource end");
+    }
     memcpy(buffer, data, sz);
     pos += sz;
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -136,28 +126,29 @@ void MemoryResourceStream::read(char *buffer, size_t sz)
 //
 ///////////////////////////////////////////////////////////////////
 
-
-ResourceFile::ResourceFile(const std::wstring &fileName, Buffer *buf):
-        name(fileName)
-{
+ResourceFile::ResourceFile(const std::wstring &fileName, Buffer *buf)
+    : name(fileName) {
     if (buf) {
         buffer = buf;
         ownBuffer = false;
-    } else {
+    }
+    else {
         buffer = new Buffer();
         ownBuffer = true;
     }
-    
+
     stream.open(toMbcs(fileName).c_str(), std::ios::in | std::ios::binary);
-    if (stream.fail())
+    if (stream.fail()) {
         throw Exception(L"Error loading resource file '" + name + L"'");
-    
+    }
+
     char sign[4];
     stream.read(sign, 4);
     int readed = stream.gcount();
-    if (stream.fail() || (readed != 4) || (sign[0] != 'C') || 
-            (sign[1] != 'R') || (sign[2] != 'F') || sign[3])
+    if (stream.fail() || (readed != 4) || (sign[0] != 'C') || (sign[1] != 'R')
+        || (sign[2] != 'F') || sign[3]) {
         throw Exception(L"Invalid resource file '" + name + L"'");
+    }
 
     int major = readInt(stream);
     readed = stream.gcount();
@@ -165,30 +156,30 @@ ResourceFile::ResourceFile(const std::wstring &fileName, Buffer *buf):
     readed += stream.gcount();
     priority = readInt(stream);
     readed += stream.gcount();
-    if (stream.fail() || (readed != 12) || (major != 2) || (minor < 0))
-        throw Exception(L"Incompatible version of resource file '" + 
-                name + L"'");
+    if (stream.fail() || (readed != 12) || (major != 2) || (minor < 0)) {
+        throw Exception(L"Incompatible version of resource file '" + name
+                        + L"'");
+    }
 }
 
-
-ResourceFile::~ResourceFile()
-{
+ResourceFile::~ResourceFile() {
     stream.close();
-    if (ownBuffer)
+    if (ownBuffer) {
         delete buffer;
+    }
 }
 
-
-void ResourceFile::getDirectory(Directory &directory)
-{
+void ResourceFile::getDirectory(Directory &directory) {
     stream.seekg(-8, std::ios::end);
-    if (stream.fail())
+    if (stream.fail()) {
         throw Exception(L"Error reading " + name + L" directory");
+    }
     int start = readInt(stream);
     int count = readInt(stream);
     stream.seekg(start, std::ios::beg);
-    if (stream.fail())
+    if (stream.fail()) {
         throw Exception(L"Error reading " + name + L" directory");
+    }
 
     for (int i = 0; i < count; i++) {
         DirectoryEntry entry;
@@ -200,40 +191,40 @@ void ResourceFile::getDirectory(Directory &directory)
         entry.group = readString(stream);
         directory.push_back(entry);
     }
-    
-    if (stream.fail())
+
+    if (stream.fail()) {
         throw Exception(L"Error reading " + name + L" directory");
+    }
 }
 
-
-void ResourceFile::unpack(char *in, int inSize, char *out, int outSize)
-{
+void ResourceFile::unpack(char *in, int inSize, char *out, int outSize) {
     z_stream zs;
-    
+
     memset(&zs, 0, sizeof(z_stream));
-    zs.next_in = (Bytef*)in;
+    zs.next_in = (Bytef *)in;
     zs.avail_in = inSize;
-    zs.next_out = (Bytef*)out;
+    zs.next_out = (Bytef *)out;
     zs.avail_out = outSize;
-    
-    if (inflateInit(&zs) != Z_OK) 
+
+    if (inflateInit(&zs) != Z_OK) {
         throw Exception(name + L": Error initializing inflate stream.");
-    
-    if (inflate(&zs, Z_FINISH) != Z_STREAM_END)
+    }
+
+    if (inflate(&zs, Z_FINISH) != Z_STREAM_END) {
         throw Exception(name + L": Error decompresing element.");
-    
-    if (inflateEnd(&zs) != Z_OK)
+    }
+
+    if (inflateEnd(&zs) != Z_OK) {
         throw Exception(name + L": Error finishing decompresing.");
+    }
 }
 
-
-void ResourceFile::load(char *buf, long offset, long packedSize, 
-        long unpackedSize, int level)
-{
+void ResourceFile::load(char *buf, long offset, long packedSize,
+                        long unpackedSize, int level) {
     char *inBuf = nullptr;
-    
+
     try {
-        if (! level) {
+        if (!level) {
             stream.seekg(offset, std::ios::beg);
             stream.read(buf, unpackedSize);
             return;
@@ -241,39 +232,45 @@ void ResourceFile::load(char *buf, long offset, long packedSize,
 
         buffer->setSize(packedSize);
         stream.seekg(offset, std::ios::beg);
-        stream.read((char*)buffer->getData(), packedSize);
-        unpack((char*)buffer->getData(), packedSize, buf, unpackedSize);
+        stream.read((char *)buffer->getData(), packedSize);
+        unpack((char *)buffer->getData(), packedSize, buf, unpackedSize);
     } catch (Exception &e) {
-        if (inBuf) free(inBuf);
+        if (inBuf) {
+            free(inBuf);
+        }
         throw;
     } catch (...) {
-        if (inBuf) free(inBuf);
+        if (inBuf) {
+            free(inBuf);
+        }
         throw Exception(name + L": Error loading resource");
     }
 }
 
-
-void* ResourceFile::load(long offset, long packedSize, long unpackedSize,
-        int level)
-{
+void *ResourceFile::load(long offset, long packedSize, long unpackedSize,
+                         int level) {
     char *outBuf = nullptr;
-    
+
     try {
-        outBuf = (char*)malloc(unpackedSize);
-        if (! outBuf)
+        outBuf = (char *)malloc(unpackedSize);
+        if (!outBuf) {
             throw Exception(name + L": Error allocating memory");
+        }
         load(outBuf, offset, packedSize, unpackedSize, level);
     } catch (Exception &e) {
-        if (outBuf) free(outBuf);
+        if (outBuf) {
+            free(outBuf);
+        }
         throw;
     } catch (...) {
-        if (outBuf) free(outBuf);
+        if (outBuf) {
+            free(outBuf);
+        }
         throw Exception(name + L": Error loading resource");
     }
 
     return outBuf;
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -281,10 +278,8 @@ void* ResourceFile::load(long offset, long packedSize, long unpackedSize,
 //
 ///////////////////////////////////////////////////////////////////
 
-
 ResVariant::ResVariant(ResourceFile *f, int score,
-        const ResourceFile::DirectoryEntry &e)
-{
+                       const ResourceFile::DirectoryEntry &e) {
     file = f;
     i18nScore = score;
     offset = e.offset;
@@ -295,67 +290,65 @@ ResVariant::ResVariant(ResourceFile *f, int score,
     data = nullptr;
 }
 
-
-ResVariant::~ResVariant()
-{
-    if (data)
-        free((char*)data - sizeof(ResVariant*));
+ResVariant::~ResVariant() {
+    if (data) {
+        free((char *)data - sizeof(ResVariant *));
+    }
 }
 
-void* ResVariant::getRef()
-{
-    if (! refCnt) {
-        char* d = (char*)malloc(unpackedSize + sizeof(void*));
-        if (! d)
+void *ResVariant::getRef() {
+    if (!refCnt) {
+        char *d = (char *)malloc(unpackedSize + sizeof(void *));
+        if (!d) {
             throw Exception(L"ResVariant::getRef memory allocation error");
+        }
         ResVariant *self = this;
-        file->load(d + sizeof(self), offset, packedSize, unpackedSize,
-                level);
+        file->load(d + sizeof(self), offset, packedSize, unpackedSize, level);
         memcpy(d, &self, sizeof(self));
         data = d + sizeof(self);
     }
-        
+
     refCnt++;
     return data;
 }
 
-void* ResVariant::getRef(size_t &sz)
-{
+void *ResVariant::getRef(size_t &sz) {
     sz = unpackedSize;
     return getRef();
 }
 
-void ResVariant::delRef(void *dta)
-{
-    if ((! refCnt) || (dta != data))
+void ResVariant::delRef(void *dta) {
+    if ((!refCnt) || (dta != data)) {
         throw Exception(L"Invalid ResVariant::delRef call");
+    }
 
     refCnt--;
-    if (! refCnt) {
-        free((char*)data - sizeof(ResVariant*));
+    if (!refCnt) {
+        free((char *)data - sizeof(ResVariant *));
         data = nullptr;
     }
 }
 
-void ResVariant::getData(Buffer &buffer)
-{
+void ResVariant::getData(Buffer &buffer) {
     buffer.setSize(unpackedSize);
-    if (! refCnt)
-        file->load((char*)buffer.getData(), offset, packedSize, 
-                unpackedSize, level);
-    else
-        memcpy((char*)buffer.getData(), data, unpackedSize);
+    if (!refCnt) {
+        file->load((char *)buffer.getData(), offset, packedSize, unpackedSize,
+                   level);
+    }
+    else {
+        memcpy((char *)buffer.getData(), data, unpackedSize);
+    }
 }
 
-ResourceStream* ResVariant::createStream()
-{
-    if (refCnt || level)
+ResourceStream *ResVariant::createStream() {
+    if (refCnt || level) {
         return new MemoryResourceStream(this);
-    else
-        return new UnpackedResourceStream(file->getStream(), offset, 
-                packedSize);
+    }
+    else {
+        return new UnpackedResourceStream(file->getStream(), offset,
+                                          packedSize);
+    }
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -363,92 +356,80 @@ ResourceStream* ResVariant::createStream()
 //
 ///////////////////////////////////////////////////////////////////
 
-
 Resource::Resource(ResourceFile *file, int i18nScore,
-        const ResourceFile::DirectoryEntry &entry, const std::wstring &n):
-                name(n)
-{
+                   const ResourceFile::DirectoryEntry &entry,
+                   const std::wstring &n)
+    : name(n) {
     addVariant(file, i18nScore, entry);
 }
 
-Resource::~Resource()
-{
-    for (auto& variant : variants)
+Resource::~Resource() {
+    for (auto &variant : variants) {
         delete variant;
+    }
 }
 
-class ScorePredicate
-{
-    public:
-        int score;
-        
-        explicit ScorePredicate(int sc) { score = sc; }
+class ScorePredicate {
+  public:
+    int score;
 
-        bool operator() (const ResVariant *r) const {
-            return r->getI18nScore() == score;
-        }
+    explicit ScorePredicate(int sc) { score = sc; }
+
+    bool operator()(const ResVariant *r) const {
+        return r->getI18nScore() == score;
+    }
 };
 
-class ResVariantMoreThen
-{
-    public:
-        bool operator() (const ResVariant *v1, const ResVariant *v2) const {
-            return v1->getI18nScore() > v2->getI18nScore();
-        }
+class ResVariantMoreThen {
+  public:
+    bool operator()(const ResVariant *v1, const ResVariant *v2) const {
+        return v1->getI18nScore() > v2->getI18nScore();
+    }
 };
 
 void Resource::addVariant(ResourceFile *file, int i18nScore,
-        const ResourceFile::DirectoryEntry &entry)
-{
+                          const ResourceFile::DirectoryEntry &entry) {
     if (variants.empty()) {
         variants.push_back(new ResVariant(file, i18nScore, entry));
         return;
     }
-    
+
     ScorePredicate p(i18nScore);
     Variants::iterator i = std::find_if(variants.begin(), variants.end(), p);
     if (i != variants.end()) {
         delete *i;
         *i = new ResVariant(file, i18nScore, entry);
-    } else {
+    }
+    else {
         variants.push_back(new ResVariant(file, i18nScore, entry));
         ResVariantMoreThen comparator;
         std::sort(variants.begin(), variants.end(), comparator);
     }
 }
 
-
-void* Resource::getRef(int variant)
-{
+void *Resource::getRef(int variant) {
     return variants[variant]->getRef();
 }
 
-
-void* Resource::getRef(int *size, int variant)
-{
-    if (size)
+void *Resource::getRef(int *size, int variant) {
+    if (size) {
         *size = variants[variant]->getSize();
+    }
     return variants[variant]->getRef();
 }
 
-
-void Resource::delRef(void *data)
-{
-    ResVariant *v = *(ResVariant**)((char*)data - sizeof(ResVariant*));
+void Resource::delRef(void *data) {
+    ResVariant *v = *(ResVariant **)((char *)data - sizeof(ResVariant *));
     v->delRef(data);
 }
 
-
-void Resource::getData(Buffer &buffer, int variant)
-{
+void Resource::getData(Buffer &buffer, int variant) {
     variants[variant]->getData(buffer);
 }
 
-ResourceStream* Resource::createStream(int variant)
-{
+ResourceStream *Resource::createStream(int variant) {
     return variants[variant]->createStream();
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -456,130 +437,116 @@ ResourceStream* Resource::createStream(int variant)
 //
 ///////////////////////////////////////////////////////////////////
 
-
-class ResFileMoreThen
-{
-    public:
-        bool operator() (const ResourceFile *f1, const ResourceFile *f2) const {
-            return f1->getPriority() > f2->getPriority();
-        }
+class ResFileMoreThen {
+  public:
+    bool operator()(const ResourceFile *f1, const ResourceFile *f2) const {
+        return f1->getPriority() > f2->getPriority();
+    }
 };
 
-ResourcesCollection::ResourcesCollection(StringList &directories)
-{
+ResourcesCollection::ResourcesCollection(StringList &directories) {
     loadResourceFiles(directories);
     ResFileMoreThen comparator;
     std::sort(files.begin(), files.end(), comparator);
     processFiles();
 }
 
-
-ResourcesCollection::~ResourcesCollection()
-{
-    for (auto& resource : resources)
+ResourcesCollection::~ResourcesCollection() {
+    for (auto &resource : resources) {
         delete resource.second;
-    for (auto& file : files)
+    }
+    for (auto &file : files) {
         delete file;
+    }
 }
 
-
-void ResourcesCollection::loadResourceFiles(StringList &directories)
-{
-    for (auto& d : directories)
-    {
+void ResourcesCollection::loadResourceFiles(StringList &directories) {
+    for (auto &d : directories) {
         DIR *dir = opendir(toMbcs(d).c_str());
         if (dir) {
             struct dirent *de;
-            while ((de = readdir(dir)))
+            while ((de = readdir(dir))) {
                 if (de->d_name[0] != '.') {
                     std::wstring s(fromMbcs(de->d_name));
-                    if ((s.length() > 4) && 
-                            (toLowerCase(s.substr(s.length() - 4)) == L".res"))
-                        files.push_back(new ResourceFile(d + L"/" + s, &buffer));
+                    if ((s.length() > 4)
+                        && (toLowerCase(s.substr(s.length() - 4)) == L".res")) {
+                        files.push_back(
+                            new ResourceFile(d + L"/" + s, &buffer));
+                    }
                 }
+            }
             closedir(dir);
         }
     }
 }
 
-
-void ResourcesCollection::processFiles()
-{
+void ResourcesCollection::processFiles() {
     ResourceFile::Directory dir;
-    for (auto file : files)
-    {
+    for (auto file : files) {
         file->getDirectory(dir);
-        for (auto& de : dir)
-        {
+        for (auto &de : dir) {
             std::wstring name, ext, language, country;
             splitFileName(de.name, name, ext, language, country);
             int score = getScore(language, country, locale);
             if (score > 0) {
                 std::wstring resName = name + L"." + ext;
                 Resource *res = resources[resName];
-                if (! res) {
+                if (!res) {
                     res = new Resource(file, score, de, resName);
                     resources[resName] = res;
-                    if (de.group.length())
+                    if (de.group.length()) {
                         groups[de.group].push_back(res);
-                } else
+                    }
+                }
+                else {
                     res->addVariant(file, score, de);
+                }
             }
         }
         dir.clear();
     }
 }
 
-
-Resource* ResourcesCollection::getResource(const std::wstring &name)
-{
+Resource *ResourcesCollection::getResource(const std::wstring &name) {
     Resource *r = resources[name];
-    if (! r)
+    if (!r) {
         throw Exception(L"Resource '" + name + L"' not found");
+    }
     return r;
 }
 
-
-void* ResourcesCollection::getRef(const std::wstring &name, int &size)
-{
+void *ResourcesCollection::getRef(const std::wstring &name, int &size) {
     Resource *r = getResource(name);
     ResVariant *v = r->getVariant(0);
     size = v->getSize();
     return v->getRef();
 }
 
-
-void* ResourcesCollection::getRef(const std::wstring &name)
-{
+void *ResourcesCollection::getRef(const std::wstring &name) {
     Resource *r = getResource(name);
     ResVariant *v = r->getVariant(0);
     return v->getRef();
 }
 
-ResourceStream* ResourcesCollection::createStream(const std::wstring &name)
-{
+ResourceStream *ResourcesCollection::createStream(const std::wstring &name) {
     Resource *r = getResource(name);
     return r->createStream();
 }
 
-void ResourcesCollection::delRef(void *data)
-{
-    ResVariant *v = *(ResVariant**)((char*)data - sizeof(ResVariant*));
+void ResourcesCollection::delRef(void *data) {
+    ResVariant *v = *(ResVariant **)((char *)data - sizeof(ResVariant *));
     v->delRef(data);
 }
 
-void ResourcesCollection::forEachInGroup(const std::wstring &name, 
-        Visitor<Resource*> &visitor)
-{
+void ResourcesCollection::forEachInGroup(const std::wstring &name,
+                                         Visitor<Resource *> &visitor) {
     if (groups.count(name) > 0) {
         ResourcesList &l = groups[name];
-        for (auto r : l)
-        {
+        for (auto r : l) {
             visitor.onVisit(r);
         }
     }
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //
@@ -587,28 +554,23 @@ void ResourcesCollection::forEachInGroup(const std::wstring &name,
 //
 ///////////////////////////////////////////////////////////////////
 
-
-ResDataHolder::ResDataHolder()
-{
+ResDataHolder::ResDataHolder() {
     data = nullptr;
     size = 0;
 }
 
-ResDataHolder::ResDataHolder(const std::wstring &name)
-{
+ResDataHolder::ResDataHolder(const std::wstring &name) {
     load(name);
 }
 
-ResDataHolder::~ResDataHolder()
-{
-    if (data)
+ResDataHolder::~ResDataHolder() {
+    if (data) {
         resources->delRef(data);
+    }
 }
 
-void ResDataHolder::load(const std::wstring &name)
-{
+void ResDataHolder::load(const std::wstring &name) {
     int s;
     data = resources->getRef(name, s);
     size = (size_t)s;
 }
-

@@ -18,10 +18,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+#include "screen.h"
 #include <SDL.h>
 #include <SDL_video.h>
-#include "screen.h"
 
 #include "exceptions.h"
 #include "unicode.h"
@@ -29,40 +28,41 @@
 
 #include <sstream>
 
-#define UNSCALED_WIDTH      800
-#define UNSCALED_HEIGHT     600
-#define NUM_MODES           5
+#define UNSCALED_WIDTH 800
+#define UNSCALED_HEIGHT 600
+#define NUM_MODES 5
 
-int modes[NUM_MODES][2]={{800,600},{1024,768},{1152,864},{1280,960},{1400,1050}};
+int modes[NUM_MODES][2]
+    = {{800, 600}, {1024, 768}, {1152, 864}, {1280, 960}, {1400, 1050}};
 
 int DESKTOP_WIDTH = 0;
 int DESKTOP_HEIGHT = 0;
 
 Screen::Screen()
     : screen(nullptr), scale(1.0), fullScreen(false), screenSize(0),
-        window(nullptr), renderer(nullptr), texture(nullptr),
-        mouseCursor(nullptr), mouseVisible(false),
-        regionsList(nullptr), maxRegionsList(0), saveX(0), saveY(0),
-        niceCursor(false), cursor(nullptr), emptyCursor(nullptr)
-{
+      window(nullptr), renderer(nullptr), texture(nullptr),
+      mouseCursor(nullptr), mouseVisible(false), regionsList(nullptr),
+      maxRegionsList(0), saveX(0), saveY(0), niceCursor(false), cursor(nullptr),
+      emptyCursor(nullptr) {
 }
 
-Screen::~Screen()
-{
+Screen::~Screen() {
     SDL_SetCursor(cursor);
     SDL_ShowCursor(SDL_ENABLE);
-    if (mouseCursor) SDL_FreeCursor(mouseCursor);
-    if (regionsList) free(regionsList);
+    if (mouseCursor) {
+        SDL_FreeCursor(mouseCursor);
+    }
+    if (regionsList) {
+        free(regionsList);
+    }
 }
 
-std::vector<std::wstring> Screen::getModeList()
-{
+std::vector<std::wstring> Screen::getModeList() {
     std::vector<std::wstring> v;
     int n = NUM_MODES;
     v.reserve(n);
-    
-    for (int i = 0; i < n; i++)
-    {
+
+    for (int i = 0; i < n; i++) {
         std::wstringstream streamVal;
         streamVal << modes[i][0] << "x" << modes[i][1];
         v.push_back(streamVal.str());
@@ -70,65 +70,70 @@ std::vector<std::wstring> Screen::getModeList()
     return v;
 }
 
-
-void Screen::setMode(bool isFullScreen)
-{
-    if (!screen || fullScreen != isFullScreen)
-    {
+void Screen::setMode(bool isFullScreen) {
+    if (!screen || fullScreen != isFullScreen) {
         fullScreen = isFullScreen;
         applyMode();
     }
 }
 
-void Screen::applyMode()
-{
-    int flags = (fullScreen)?SDL_WINDOW_FULLSCREEN_DESKTOP:SDL_WINDOW_RESIZABLE;
-    if(renderer) SDL_DestroyRenderer(renderer);
-    if(window) SDL_DestroyWindow(window);
-    window = SDL_CreateWindow("Einstein", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, UNSCALED_WIDTH, UNSCALED_HEIGHT, flags);
-    if (window) renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if(window!=NULL && renderer!=NULL) {
-      screen = SDL_CreateRGBSurface(0, UNSCALED_WIDTH, UNSCALED_HEIGHT, 32,
-				    0x00ff0000,0x0000ff00, 0x000000ff, 0xff000000);
-      texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
-				     UNSCALED_WIDTH, UNSCALED_HEIGHT);
+void Screen::applyMode() {
+    int flags
+        = (fullScreen) ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE;
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+    }
+    window = SDL_CreateWindow("Einstein", SDL_WINDOWPOS_UNDEFINED,
+                              SDL_WINDOWPOS_UNDEFINED, UNSCALED_WIDTH,
+                              UNSCALED_HEIGHT, flags);
+    if (window) {
+        renderer = SDL_CreateRenderer(
+            window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    }
+    if (window != NULL && renderer != NULL) {
+        screen = SDL_CreateRGBSurface(0, UNSCALED_WIDTH, UNSCALED_HEIGHT, 32,
+                                      0x00ff0000, 0x0000ff00, 0x000000ff,
+                                      0xff000000);
+        texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+                                    SDL_TEXTUREACCESS_STREAMING, UNSCALED_WIDTH,
+                                    UNSCALED_HEIGHT);
     }
 
-    if (! screen)
-        throw Exception(L"Couldn't set video mode: " + 
-                fromMbcs((SDL_GetError())));
+    if (!screen) {
+        throw Exception(L"Couldn't set video mode: "
+                        + fromMbcs((SDL_GetError())));
+    }
 }
 
-
-int Screen::getWidth() const
-{
+int Screen::getWidth() const {
     return UNSCALED_WIDTH;
 }
 
-
-int Screen::getHeight() const
-{
+int Screen::getHeight() const {
     return UNSCALED_HEIGHT;
 }
 
-void Screen::setMouseImage(SDL_Surface *image)
-{
-    if(mouseCursor) {
+void Screen::setMouseImage(SDL_Surface *image) {
+    if (mouseCursor) {
         SDL_FreeCursor(mouseCursor);
         mouseCursor = NULL;
     }
-    if (! image) return;
+    if (!image) {
+        return;
+    }
 
     mouseCursor = SDL_CreateColorCursor(image, 0, 0);
 }
 
-
-void Screen::hideMouse()
-{
-    if (! mouseVisible)
+void Screen::hideMouse() {
+    if (!mouseVisible) {
         return;
-   
-    if (! niceCursor) {
+    }
+
+    if (!niceCursor) {
         mouseVisible = false;
         return;
     }
@@ -137,32 +142,31 @@ void Screen::hideMouse()
     mouseVisible = false;
 }
 
-void Screen::showMouse()
-{
-    if (mouseVisible)
+void Screen::showMouse() {
+    if (mouseVisible) {
         return;
-    
-    if (! niceCursor) {
+    }
+
+    if (!niceCursor) {
         mouseVisible = true;
         return;
     }
 
-    if(mouseCursor != NULL)
+    if (mouseCursor != NULL) {
         SDL_SetCursor(mouseCursor);
+    }
     SDL_ShowCursor(SDL_ENABLE);
     mouseVisible = true;
 }
 
-void Screen::updateMouse()
-{
-  // TODO: remove
+void Screen::updateMouse() {
+    // TODO: remove
 }
 
-void Screen::flush()
-{
+void Screen::flush() {
     static uint32_t last_flush = 0;
     uint32_t now = SDL_GetTicks();
-    if ( now - last_flush > 30 ) // cap at 33 fps
+    if (now - last_flush > 30) // cap at 33 fps
     {
         last_flush = now;
         // do the actual swap...
@@ -173,115 +177,100 @@ void Screen::flush()
     }
 }
 
-void Screen::addRegionToUpdate(int chkX, int chkY, int chkW, int chkH)
-{
-  // TODO: remove
+void Screen::addRegionToUpdate(int chkX, int chkY, int chkW, int chkH) {
+    // TODO: remove
 }
 
-
-void Screen::draw(int x, int y, SDL_Surface *tile)
-{
+void Screen::draw(int x, int y, SDL_Surface *tile) {
     blitDraw(x, y, tile, screen);
 }
 
-void Screen::drawScaled(int x, int y, SDL_Surface *tile)
-{
+void Screen::drawScaled(int x, int y, SDL_Surface *tile) {
     SDL_Surface *s = scaleUp(tile);
     blitDraw(scaleUp(x), scaleUp(y), s, screen);
     SDL_FreeSurface(s);
 }
 
-void Screen::setCursor(bool nice)
-{
-    if (nice == niceCursor)
+void Screen::setCursor(bool nice) {
+    if (nice == niceCursor) {
         return;
+    }
 
-    if (niceCursor)
+    if (niceCursor) {
         SDL_SetCursor(mouseCursor);
-    else
+    }
+    else {
         SDL_SetCursor(cursor);
+    }
     niceCursor = nice;
 }
 
-void Screen::initCursors()
-{
+void Screen::initCursors() {
     cursor = SDL_GetCursor();
     Uint8 t = 0;
     emptyCursor = SDL_CreateCursor(&t, &t, 8, 1, 0, 0);
 }
 
-void Screen::doneCursors()
-{
-    if (niceCursor)
+void Screen::doneCursors() {
+    if (niceCursor) {
         SDL_SetCursor(cursor);
+    }
     SDL_FreeCursor(emptyCursor);
 }
 
-SDL_Surface* Screen::createSubimage(int x, int y, int width, int height)
-{
-    SDL_Surface *s = SDL_CreateRGBSurface(0,
-            scaleUp(width), scaleUp(height), screen->format->BitsPerPixel,
-            screen->format->Rmask, screen->format->Gmask,
-            screen->format->Bmask, screen->format->Amask);
-    if (! s)
+SDL_Surface *Screen::createSubimage(int x, int y, int width, int height) {
+    SDL_Surface *s = SDL_CreateRGBSurface(
+        0, scaleUp(width), scaleUp(height), screen->format->BitsPerPixel,
+        screen->format->Rmask, screen->format->Gmask, screen->format->Bmask,
+        screen->format->Amask);
+    if (!s) {
         throw Exception(L"Error creating buffer surface");
-    SDL_Rect src = { scaleUp(x), scaleUp(y), scaleUp(width), scaleUp(height) };
-    SDL_Rect dst = { 0, 0, src.w, src.h };
+    }
+    SDL_Rect src = {scaleUp(x), scaleUp(y), scaleUp(width), scaleUp(height)};
+    SDL_Rect dst = {0, 0, src.w, src.h};
     SDL_BlitSurface(screen, &src, s, &dst);
     return s;
 }
 
-void Screen::drawWallpaper(const std::wstring &name)
-{
+void Screen::drawWallpaper(const std::wstring &name) {
     drawTiled(name, screen);
     addRegionToUpdate(0, 0, getWidth(), getHeight());
 }
 
-SDL_PixelFormat* Screen::getFormat()
-{
+SDL_PixelFormat *Screen::getFormat() {
     return screen->format;
 }
 
-void Screen::setClipRect(SDL_Rect* rect)
-{
-    if (rect)
-    {
-      SDL_Rect sRect = { scaleUp(rect->x), scaleUp(rect->y),
-                                      scaleUp(rect->w), scaleUp(rect->h) };
-      SDL_SetClipRect(screen, &sRect);
+void Screen::setClipRect(SDL_Rect *rect) {
+    if (rect) {
+        SDL_Rect sRect = {scaleUp(rect->x), scaleUp(rect->y), scaleUp(rect->w),
+                          scaleUp(rect->h)};
+        SDL_SetClipRect(screen, &sRect);
     }
-    else
-    {
+    else {
         SDL_SetClipRect(screen, rect);
     }
 }
 
-void Screen::setSize(int size)
-{
-    if (screenSize != size)
-    {
-      screenSize = size;
-      if (!fullScreen)
-      {
-          applyMode();
-      }
+void Screen::setSize(int size) {
+    if (screenSize != size) {
+        screenSize = size;
+        if (!fullScreen) {
+            applyMode();
+        }
     }
 }
 
-
-float Screen::getScale()
-{
+float Screen::getScale() {
     return scale;
 }
 
-void Screen::getMouse(int* x, int* y)
-{
+void Screen::getMouse(int *x, int *y) {
     SDL_GetMouseState(x, y);
     convertMouse(x, y);
 }
 
-void Screen::convertMouse(int* x, int* y)
-{
+void Screen::convertMouse(int *x, int *y) {
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
     (*x) = ((*x) * screen->w) / w;

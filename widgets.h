@@ -18,390 +18,359 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __WIDGETS_H__
 #define __WIDGETS_H__
 
-#include <SDL.h>
 #include "font.h"
+#include <SDL.h>
 
-#include <set>
 #include <list>
+#include <set>
 #include <string>
 #include <vector>
 
-class Command
-{
-    public:
-        virtual ~Command() = default;
-        virtual void doAction() = 0;
+class Command {
+  public:
+    virtual ~Command() = default;
+    virtual void doAction() = 0;
 };
-
 
 class Area;
 
+class Widget {
+  protected:
+    Area *area;
 
-class Widget
-{
-    protected:
-        Area *area;
-    
-    public:
-        virtual ~Widget() = default;
+  public:
+    virtual ~Widget() = default;
 
-    public:
-        virtual bool onMouseButtonDown(int button, int x, int y) { return false; }
-        virtual bool onMouseButtonUp(int button, int x, int y) { return false; }
-        virtual bool onMouseMove(int x, int y) { return false; }
-        virtual void draw() { }
-        virtual void setParent(Area *a) { area = a; }
-        virtual bool onKeyDown(SDL_Keycode key, unsigned char ch) { return false; }
-        virtual bool destroyByArea() { return true; }
+  public:
+    virtual bool onMouseButtonDown(int button, int x, int y) { return false; }
+    virtual bool onMouseButtonUp(int button, int x, int y) { return false; }
+    virtual bool onMouseMove(int x, int y) { return false; }
+    virtual void draw() {}
+    virtual void setParent(Area *a) { area = a; }
+    virtual bool onKeyDown(SDL_Keycode key, unsigned char ch) { return false; }
+    virtual bool destroyByArea() { return true; }
 };
 
-class BoundedWidget: public Widget
-{
-    protected:
-        int left, top, width, height;
-        bool transparent;
-        BoundedWidget(int left, int top, int width, int height, bool transparent = false);
-    
-    public:
-        int getLeft();
-        int getTop();
-        int getWidth();
-        int getHeight();
+class BoundedWidget : public Widget {
+  protected:
+    int left, top, width, height;
+    bool transparent;
+    BoundedWidget(int left, int top, int width, int height,
+                  bool transparent = false);
+
+  public:
+    int getLeft();
+    int getTop();
+    int getWidth();
+    int getHeight();
 };
 
+class TileWidget : public BoundedWidget {
+  protected:
+    SDL_Surface *image, *sImage;
+    float scale;
 
-class TileWidget: public BoundedWidget
-{
-    protected:
-        SDL_Surface *image, *sImage;
-        float scale;
-    
-    protected:
-        TileWidget(int left, int top, int width, int height, bool transparent = false);
-        virtual ~TileWidget();
-        virtual SDL_Surface* getImage();
-    
-    public:
-        void draw() override;
-        virtual void rescale();
+  protected:
+    TileWidget(int left, int top, int width, int height,
+               bool transparent = false);
+    virtual ~TileWidget();
+    virtual SDL_Surface *getImage();
+
+  public:
+    void draw() override;
+    virtual void rescale();
 };
 
+class HighlightableWidget : public TileWidget {
+  protected:
+    SDL_Surface *highlighted, *sHighlighted;
+    bool mouseInside;
 
-class HighlightableWidget: public TileWidget
-{
-    protected:
-        SDL_Surface *highlighted, *sHighlighted;
-        bool mouseInside;
-    
-    protected:
-        HighlightableWidget(int left, int top, int width, int height, bool transparent = false);
-        virtual ~HighlightableWidget();
-        SDL_Surface* getImage() override;
-    
-    public:
-        void rescale() override;
+  protected:
+    HighlightableWidget(int left, int top, int width, int height,
+                        bool transparent = false);
+    virtual ~HighlightableWidget();
+    SDL_Surface *getImage() override;
+
+  public:
+    void rescale() override;
 };
 
-
-class ClickableWidget: public HighlightableWidget
-{
-    protected:
-    ClickableWidget(int left, int top, int width, int height, bool transparent = false);
+class ClickableWidget : public HighlightableWidget {
+  protected:
+    ClickableWidget(int left, int top, int width, int height,
+                    bool transparent = false);
     virtual void handleClick() = 0;
-    
-    public:
-        virtual void doClick();
-        bool onMouseButtonDown(int button, int x, int y) override;
-        bool onMouseMove(int x, int y) override;
+
+  public:
+    virtual void doClick();
+    bool onMouseButtonDown(int button, int x, int y) override;
+    bool onMouseMove(int x, int y) override;
 };
 
-class TextHighlightWidget: public ClickableWidget
-{
-    protected:
-        int red, green, blue;
-        int hRed, hGreen, hBlue;
-        Font* font;
-        
-    protected:
-        TextHighlightWidget(int x, int y, int w, int h, Font *f, 
-                int fR, int fG, int fB, int hR, int hG, int hB,
-                bool transparent = false);
-        TextHighlightWidget(int x, int y, int w, int h, Font *f, 
-                int r, int g, int b,
-                bool transparent = false);
-        virtual std::wstring getText() = 0;
-    
-    public:
-        void draw() override;
+class TextHighlightWidget : public ClickableWidget {
+  protected:
+    int red, green, blue;
+    int hRed, hGreen, hBlue;
+    Font *font;
+
+  protected:
+    TextHighlightWidget(int x, int y, int w, int h, Font *f, int fR, int fG,
+                        int fB, int hR, int hG, int hB,
+                        bool transparent = false);
+    TextHighlightWidget(int x, int y, int w, int h, Font *f, int r, int g,
+                        int b, bool transparent = false);
+    virtual std::wstring getText() = 0;
+
+  public:
+    void draw() override;
 };
 
+class Button : public TextHighlightWidget {
+  protected:
+    Command *command;
+    std::wstring text;
 
-class Button: public TextHighlightWidget
-{
-    protected:
-        Command *command;
-        std::wstring text;
-        
-    protected:
-        std::wstring getText() override;
-        void handleClick() override;
-    
-    public:
-        Button(int x, int y, int width, int height, Font *font, 
-                int fR, int fG, int fB, int hR, int hG, int hB, 
-                const std::wstring &text, Command *cmd=nullptr);
-        Button(int x, int y, int width, int height, Font *font, 
-                int r, int g, int b, const std::wstring &background, 
-                const std::wstring &text, Command *cmd=nullptr);
-        Button(int x, int y, int width, int height, Font *font, 
-                int r, int g, int b, const std::wstring &background, 
-                const std::wstring &text, bool bevel, Command *cmd=nullptr);
+  protected:
+    std::wstring getText() override;
+    void handleClick() override;
 
-    public:
-        void moveTo(int x, int y) { left = x; top = y; }
+  public:
+    Button(int x, int y, int width, int height, Font *font, int fR, int fG,
+           int fB, int hR, int hG, int hB, const std::wstring &text,
+           Command *cmd = nullptr);
+    Button(int x, int y, int width, int height, Font *font, int r, int g, int b,
+           const std::wstring &background, const std::wstring &text,
+           Command *cmd = nullptr);
+    Button(int x, int y, int width, int height, Font *font, int r, int g, int b,
+           const std::wstring &background, const std::wstring &text, bool bevel,
+           Command *cmd = nullptr);
+
+  public:
+    void moveTo(int x, int y) {
+        left = x;
+        top = y;
+    }
 };
 
+class KeyAccel : public Widget {
+  protected:
+    SDL_Keycode key;
+    Command *command;
 
-
-class KeyAccel: public Widget
-{
-    protected:
-        SDL_Keycode key;
-        Command *command;
-
-    public:
-        KeyAccel(SDL_Keycode key, Command *command);
-        bool onKeyDown(SDL_Keycode key, unsigned char ch) override;
+  public:
+    KeyAccel(SDL_Keycode key, Command *command);
+    bool onKeyDown(SDL_Keycode key, unsigned char ch) override;
 };
 
-
-class TimerHandler
-{
-    public:
-        virtual ~TimerHandler() = default;
-        virtual void onTimer() = 0;
+class TimerHandler {
+  public:
+    virtual ~TimerHandler() = default;
+    virtual void onTimer() = 0;
 };
 
+class Area : public Widget {
+  private:
+    typedef std::list<Widget *> WidgetsList;
+    WidgetsList widgets;
+    std::set<Widget *> notManagedWidgets;
+    bool terminate;
+    Uint32 time;
+    TimerHandler *timer;
 
-class Area: public Widget
-{
-    private:
-        typedef std::list<Widget*> WidgetsList;
-        WidgetsList widgets;
-        std::set<Widget*> notManagedWidgets;
-        bool terminate;
-        Uint32 time;
-        TimerHandler *timer;
+  public:
+    Area();
+    virtual ~Area();
 
-    public:
-        Area();
-        virtual ~Area();
-
-    public:
-        bool contains(Widget * widget);
-        void add(Widget *widget, bool manage=true);
-        void remove(Widget *widget);
-        void setVisible(Widget *widget, bool visible);
-        void handleEvent(const SDL_Event &event);
-        void run();
-        void finishEventLoop();
-        void draw() override;
-        void setTimer(Uint32 interval, TimerHandler *handler);
-        void updateMouse();
-        bool destroyByArea() override { return false; }
+  public:
+    bool contains(Widget *widget);
+    void add(Widget *widget, bool manage = true);
+    void remove(Widget *widget);
+    void setVisible(Widget *widget, bool visible);
+    void handleEvent(const SDL_Event &event);
+    void run();
+    void finishEventLoop();
+    void draw() override;
+    void setTimer(Uint32 interval, TimerHandler *handler);
+    void updateMouse();
+    bool destroyByArea() override { return false; }
 };
 
+class ExitCommand : public Command {
+  private:
+    Area &area;
 
-class ExitCommand: public Command
-{
-    private:
-        Area &area;
-    
-    public:
-        explicit ExitCommand(Area &a): area(a) { }
-        
-        void doAction() override {
-            area.finishEventLoop();
-        }
+  public:
+    explicit ExitCommand(Area &a) : area(a) {}
+
+    void doAction() override { area.finishEventLoop(); }
 };
 
+class AnyKeyAccel : public Widget {
+  protected:
+    Command *command;
 
-class AnyKeyAccel: public Widget
-{
-    protected:
-        Command *command;
+  public:
+    AnyKeyAccel(); // use exit command by default
+    explicit AnyKeyAccel(Command *command);
+    virtual ~AnyKeyAccel();
 
-    public:
-        AnyKeyAccel();                  // use exit command by default
-        explicit AnyKeyAccel(Command *command);
-        virtual ~AnyKeyAccel();
-
-    public:
-        bool onKeyDown(SDL_Keycode key, unsigned char ch) override;
-        bool onMouseButtonDown(int button, int x, int y) override;
+  public:
+    bool onKeyDown(SDL_Keycode key, unsigned char ch) override;
+    bool onMouseButtonDown(int button, int x, int y) override;
 };
 
-
-class Window: public TileWidget
-{
-    public:
-        Window(int x, int y, int w, int h, const std::wstring &background, 
-                int frameWidth=4, bool raised=true);
+class Window : public TileWidget {
+  public:
+    Window(int x, int y, int w, int h, const std::wstring &background,
+           int frameWidth = 4, bool raised = true);
 };
 
+class Label : public BoundedWidget {
+  public:
+    enum HorAlign {
+        ALIGN_LEFT,
+        ALIGN_CENTER,
+        ALIGN_RIGHT
+    };
 
-class Label: public BoundedWidget
-{
-    public:
-        enum HorAlign {
-            ALIGN_LEFT,
-            ALIGN_CENTER,
-            ALIGN_RIGHT
-        };
-        
-        enum VerAlign {
-            ALIGN_TOP,
-            ALIGN_MIDDLE,
-            ALIGN_BOTTOM
-        };
-    
-    protected:
-        Font *font;
-        std::wstring text;
-        int red, green, blue;
-        HorAlign hAlign;
-        VerAlign vAlign;
-        bool shadow;
+    enum VerAlign {
+        ALIGN_TOP,
+        ALIGN_MIDDLE,
+        ALIGN_BOTTOM
+    };
 
-    public:
-        Label(Font *font, int x, int y, int r, int g, int b, 
-                const std::wstring& text, bool shadow=true);
-        Label(Font *font, int x, int y, int width, int height,
-                HorAlign hAlign, VerAlign vAlign, int r, int g, int b, 
-                const std::wstring &text);
+  protected:
+    Font *font;
+    std::wstring text;
+    int red, green, blue;
+    HorAlign hAlign;
+    VerAlign vAlign;
+    bool shadow;
 
-    public:
-        void draw() override;
+  public:
+    Label(Font *font, int x, int y, int r, int g, int b,
+          const std::wstring &text, bool shadow = true);
+    Label(Font *font, int x, int y, int width, int height, HorAlign hAlign,
+          VerAlign vAlign, int r, int g, int b, const std::wstring &text);
+
+  public:
+    void draw() override;
 };
 
-
-class ManagedLabel: public Label
-{
-    public:
-        ManagedLabel(const std::wstring& fontName, int ptSize, int x, int y,
-                int r, int g, int b, const std::wstring& text, bool shadow=true);
-        ManagedLabel(const std::wstring& fontName, int ptSize, int x, int y, int width, int height,
-                HorAlign hAlign, VerAlign vAlign, int r, int g, int b, const std::wstring &text);
-        ~ManagedLabel();
+class ManagedLabel : public Label {
+  public:
+    ManagedLabel(const std::wstring &fontName, int ptSize, int x, int y, int r,
+                 int g, int b, const std::wstring &text, bool shadow = true);
+    ManagedLabel(const std::wstring &fontName, int ptSize, int x, int y,
+                 int width, int height, HorAlign hAlign, VerAlign vAlign, int r,
+                 int g, int b, const std::wstring &text);
+    ~ManagedLabel();
 };
 
+class InputField : public Window, public TimerHandler {
+  private:
+    std::wstring &text;
+    int maxLength;
+    int cursorPos;
+    int red, green, blue;
+    Font *font;
+    Uint32 lastCursor;
+    bool cursorVisible;
 
-class InputField: public Window, public TimerHandler
-{
-    private:
-        std::wstring &text;
-        int maxLength;
-        int cursorPos;
-        int red, green, blue;
-        Font *font;
-        Uint32 lastCursor;
-        bool cursorVisible;
-    
-    public:
-        InputField(int x, int y, int w, int h, const std::wstring &background, 
-                std::wstring &name, int maxLength, int r, int g, int b, Font *font);
-        ~InputField();
-        
-    public:
-        void draw() override;
-        void setParent(Area *a) override;
-        void onTimer() override;
-        bool onKeyDown(SDL_Keycode key, unsigned char ch) override;
-        virtual void onCharTyped(unsigned char ch);
+  public:
+    InputField(int x, int y, int w, int h, const std::wstring &background,
+               std::wstring &name, int maxLength, int r, int g, int b,
+               Font *font);
+    ~InputField();
 
-    private:
-        void moveCursor(int pos);
+  public:
+    void draw() override;
+    void setParent(Area *a) override;
+    void onTimer() override;
+    bool onKeyDown(SDL_Keycode key, unsigned char ch) override;
+    virtual void onCharTyped(unsigned char ch);
+
+  private:
+    void moveCursor(int pos);
 };
 
+class Checkbox : public TextHighlightWidget {
+  protected:
+    bool &checked;
 
-class Checkbox: public TextHighlightWidget
-{
-    protected:
-        bool &checked;
-        
-    public:
-        Checkbox(int x, int y, int width, int height, Font *font, 
-                int r, int g, int b, const std::wstring &background,
-                bool &checked);
+  public:
+    Checkbox(int x, int y, int width, int height, Font *font, int r, int g,
+             int b, const std::wstring &background, bool &checked);
 
-    protected:
-        std::wstring getText() override;
-        void handleClick() override;
-    
-    public:
-        void moveTo(int x, int y) { left = x; top = y; }
+  protected:
+    std::wstring getText() override;
+    void handleClick() override;
+
+  public:
+    void moveTo(int x, int y) {
+        left = x;
+        top = y;
+    }
 };
 
-class Picture: public TileWidget
-{
-    public:
-        Picture(int x, int y, const std::wstring &name, bool transparent=true);
-        Picture(int x, int y, SDL_Surface *image);
+class Picture : public TileWidget {
+  public:
+    Picture(int x, int y, const std::wstring &name, bool transparent = true);
+    Picture(int x, int y, SDL_Surface *image);
 };
 
+class Slider : public BoundedWidget {
+  private:
+    SDL_Surface *background;
+    SDL_Surface *slider;
+    SDL_Surface *activeSlider;
+    bool highlight;
+    bool dragging;
+    int dragOffsetX;
 
-class Slider: public BoundedWidget
-{
-    private:
-        SDL_Surface *background;
-        SDL_Surface *slider;
-        SDL_Surface *activeSlider;
-        bool highlight;
-        bool dragging;
-        int dragOffsetX;
+  public:
+    Slider(int x, int y, int width, int height, float &value);
+    virtual ~Slider();
 
-    public:
-        Slider(int x, int y, int width, int height, float &value);
-        virtual ~Slider();
+  public:
+    void draw() override;
+    bool onMouseButtonDown(int button, int x, int y) override;
+    bool onMouseButtonUp(int button, int x, int y) override;
+    bool onMouseMove(int x, int y) override;
 
-    public:
-        void draw() override;
-        bool onMouseButtonDown(int button, int x, int y) override;
-        bool onMouseButtonUp(int button, int x, int y) override;
-        bool onMouseMove(int x, int y) override;
+  protected:
+    float &value;
+    virtual void changeValue(float v);
 
-    protected:
-        float &value;
-        virtual void changeValue(float v);
-
-    private:
-        void createBackground();
-        void createSlider(int size);
-        int valueToX(float value);
-        float xToValue(int pos);
+  private:
+    void createBackground();
+    void createSlider(int size);
+    int valueToX(float value);
+    float xToValue(int pos);
 };
 
+class CycleButton : public TextHighlightWidget {
+  protected:
+    int &value;
+    std::vector<std::wstring> options;
 
-class CycleButton: public TextHighlightWidget
-{
-    protected:
-        int &value;
-        std::vector<std::wstring> options;
-        
-    public:
-        CycleButton(int x, int y, int width, int height, Font *font, int &value, const std::vector<std::wstring>& options);
-    
-    protected:
-        std::wstring getText() override;
-        void handleClick() override;
-    
-    public:
-        void moveTo(int x, int y) { left = x; top = y; }
+  public:
+    CycleButton(int x, int y, int width, int height, Font *font, int &value,
+                const std::vector<std::wstring> &options);
+
+  protected:
+    std::wstring getText() override;
+    void handleClick() override;
+
+  public:
+    void moveTo(int x, int y) {
+        left = x;
+        top = y;
+    }
 };
 
 #endif
-

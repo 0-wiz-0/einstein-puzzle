@@ -16,74 +16,66 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __MESSAGES_H__
 #define __MESSAGES_H__
-
 
 #include <cstdarg>
 #include <map>
 #include <string>
 
-
 class Resource;
 class Formatter;
 class Buffer;
 
-
 /// Localized messages formatter
-class Messages
-{
-    private:
-        class ScoredStr {
-        public:
-            int score;
-            Formatter *message;
-            ~ScoredStr();
-            ScoredStr(int score, Formatter* message);
-        };
-        typedef std::map<std::wstring, ScoredStr*> StrMap;
-        StrMap messages;
-    
-    public:
-        /// Create empty messages table.
-        Messages();
-        ~Messages();
+class Messages {
+  private:
+    class ScoredStr {
+      public:
+        int score;
+        Formatter *message;
+        ~ScoredStr();
+        ScoredStr(int score, Formatter *message);
+    };
+    typedef std::map<std::wstring, ScoredStr *> StrMap;
+    StrMap messages;
 
-    public:
-        /// Load message tables from resources.
-        void load();
+  public:
+    /// Create empty messages table.
+    Messages();
+    ~Messages();
 
-        /// Get simple text string
-        /// \param key message key
-        std::wstring getMessage(const std::wstring &key) const;
+  public:
+    /// Load message tables from resources.
+    void load();
 
-        /// Shorter alias for getMessage
-        /// \param key message key
-        std::wstring operator [](const std::wstring &key) const {
-            return getMessage(key);
-        }
-        
-        /// Format message
-        /// \param key message key
-        std::wstring format(const wchar_t *key, ...) const;
-        
-        /// Shorter alias for format
-        /// \param key message key
-        std::wstring operator ()(const wchar_t *key, ...) const;
-        
-        /// Load messages from resource
-        /// \param res resource
-        void loadFromResource(Resource *res, Buffer *buffer);
+    /// Get simple text string
+    /// \param key message key
+    std::wstring getMessage(const std::wstring &key) const;
 
-    private:
-        void loadBundle(int score, unsigned char *data, size_t size);
-        std::wstring format(const wchar_t *key, va_list ap) const;
+    /// Shorter alias for getMessage
+    /// \param key message key
+    std::wstring operator[](const std::wstring &key) const {
+        return getMessage(key);
+    }
+
+    /// Format message
+    /// \param key message key
+    std::wstring format(const wchar_t *key, ...) const;
+
+    /// Shorter alias for format
+    /// \param key message key
+    std::wstring operator()(const wchar_t *key, ...) const;
+
+    /// Load messages from resource
+    /// \param res resource
+    void loadFromResource(Resource *res, Buffer *buffer);
+
+  private:
+    void loadBundle(int score, unsigned char *data, size_t size);
+    std::wstring format(const wchar_t *key, va_list ap) const;
 };
-
 
 extern Messages msg;
 
-
 #endif
-

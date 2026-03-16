@@ -16,16 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __DESCR_H__
 #define __DESCR_H__
 
-
 #include "widgets.h"
-
 
 void showDescription(Area *parentArea);
 
-
 #endif
-

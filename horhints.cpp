@@ -18,32 +18,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "horhints.h"
 
 #include "main.h"
 #include "sound.h"
 #include "utils.h"
 
+#define HINTS_COLS 3
+#define HINTS_ROWS 8
+#define TILE_GAP_X 4
+#define TILE_GAP_Y 4
+#define TILE_X 348
+#define TILE_Y 68
+#define TILE_WIDTH 48
+#define TILE_HEIGHT 48
 
-#define HINTS_COLS   3
-#define HINTS_ROWS   8
-#define TILE_GAP_X   4
-#define TILE_GAP_Y   4
-#define TILE_X       348
-#define TILE_Y       68
-#define TILE_WIDTH   48
-#define TILE_HEIGHT  48
-
-
-HorHints::HorHints(IconSet &is, Rules &r): iconSet(is)
-{
+HorHints::HorHints(IconSet &is, Rules &r) : iconSet(is) {
     reset(r);
 }
 
-
-HorHints::HorHints(IconSet &is, Rules &rl, std::istream &stream): iconSet(is)
-{
+HorHints::HorHints(IconSet &is, Rules &rl, std::istream &stream) : iconSet(is) {
     const int qty = readInt(stream);
 
     for (int i = 0; i < qty; i++) {
@@ -54,29 +48,27 @@ HorHints::HorHints(IconSet &is, Rules &rl, std::istream &stream): iconSet(is)
         if (excluded) {
             excludedRules.push_back(r);
             rules.push_back(nullptr);
-        } else {
+        }
+        else {
             excludedRules.push_back(nullptr);
             rules.push_back(r);
         }
     }
 
     showExcluded = readInt(stream);
-    
+
     int x, y;
     screen.getMouse(&x, &y);
     highlighted = getRuleNo(x, y);
 }
 
-
-void HorHints::reset(Rules &r)
-{
+void HorHints::reset(Rules &r) {
     rules.clear();
     excludedRules.clear();
     numbersArr.clear();
-    
+
     int no = 0;
-    for (auto rule : r)
-    {
+    for (auto rule : r) {
         if (rule->getShowOpts() == Rule::SHOW_HORIZ) {
             rules.push_back(rule);
             excludedRules.push_back(nullptr);
@@ -84,7 +76,7 @@ void HorHints::reset(Rules &r)
         }
         no++;
     }
-    
+
     showExcluded = false;
 
     int x, y;
@@ -92,56 +84,58 @@ void HorHints::reset(Rules &r)
     highlighted = getRuleNo(x, y);
 }
 
-void HorHints::draw()
-{
-    for (int i = 0; i < HINTS_ROWS; i++)
-        for (int j = 0; j < HINTS_COLS; j++)
+void HorHints::draw() {
+    for (int i = 0; i < HINTS_ROWS; i++) {
+        for (int j = 0; j < HINTS_COLS; j++) {
             drawCell(j, i, true);
+        }
+    }
 }
 
-void HorHints::drawCell(int col, int row, bool addToUpdate)
-{
-    const int x = TILE_X + col * (TILE_WIDTH*3 + TILE_GAP_X);
+void HorHints::drawCell(int col, int row, bool addToUpdate) {
+    const int x = TILE_X + col * (TILE_WIDTH * 3 + TILE_GAP_X);
     const int y = TILE_Y + row * (TILE_HEIGHT + TILE_GAP_Y);
 
     Rule *r = nullptr;
     const int no = row * HINTS_COLS + col;
-    if (no < (int)rules.size())
-    {
-        if (showExcluded)
+    if (no < (int)rules.size()) {
+        if (showExcluded) {
             r = excludedRules[no];
-        else
+        }
+        else {
             r = rules[no];
+        }
     }
-    if (r)
+    if (r) {
         r->draw(x, y, iconSet, no == highlighted);
-    else
-    {
+    }
+    else {
         SDL_Surface *t = iconSet.getEmptyHintIcon();
         SDL_Surface *s = makeSWSurface(t->w * 3, t->h);
-        for (int i = 0; i < 3; i++)
-        {
+        for (int i = 0; i < 3; i++) {
             blitDraw(0 + (i * t->w), 0, t, s);
         }
         screen.drawScaled(x, y, s);
         SDL_FreeSurface(s);
     }
-    
-    if (addToUpdate)
-        screen.addRegionToUpdate(x, y, TILE_WIDTH*3, TILE_HEIGHT);
+
+    if (addToUpdate) {
+        screen.addRegionToUpdate(x, y, TILE_WIDTH * 3, TILE_HEIGHT);
+    }
 }
 
-
-bool HorHints::onMouseButtonDown(int button, int x, int y)
-{
-    if (button != 3) 
+bool HorHints::onMouseButtonDown(int button, int x, int y) {
+    if (button != 3) {
         return false;
+    }
 
     const int no = getRuleNo(x, y);
-    if (no < 0) return false;
+    if (no < 0) {
+        return false;
+    }
     const int row = no / HINTS_COLS;
     const int col = no - row * HINTS_COLS;
- 
+
     if (showExcluded) {
         Rule *r = excludedRules[no];
         if (r) {
@@ -150,7 +144,8 @@ bool HorHints::onMouseButtonDown(int button, int x, int y)
             excludedRules[no] = nullptr;
             drawCell(col, row);
         }
-    } else {
+    }
+    else {
         Rule *r = rules[no];
         if (r) {
             sound->play(L"whizz.wav");
@@ -163,16 +158,12 @@ bool HorHints::onMouseButtonDown(int button, int x, int y)
     return true;
 }
 
-
-void HorHints::toggleExcluded()
-{
+void HorHints::toggleExcluded() {
     showExcluded = !showExcluded;
     draw();
 }
 
-
-bool HorHints::onMouseMove(int x, int y)
-{
+bool HorHints::onMouseMove(int x, int y) {
     const int no = getRuleNo(x, y);
 
     if (no != highlighted) {
@@ -193,41 +184,42 @@ bool HorHints::onMouseMove(int x, int y)
     return false;
 }
 
-
-int HorHints::getRuleNo(int x, int y)
-{
-    if (! isInRect(x, y, TILE_X, TILE_Y, (TILE_WIDTH*3 + TILE_GAP_X) * HINTS_COLS,
-                (TILE_HEIGHT + TILE_GAP_Y) * HINTS_ROWS))
+int HorHints::getRuleNo(int x, int y) {
+    if (!isInRect(x, y, TILE_X, TILE_Y,
+                  (TILE_WIDTH * 3 + TILE_GAP_X) * HINTS_COLS,
+                  (TILE_HEIGHT + TILE_GAP_Y) * HINTS_ROWS)) {
         return -1;
+    }
 
     x = scaleDown(x) - TILE_X;
     y = scaleDown(y) - TILE_Y;
 
-    const int col = x / (TILE_WIDTH*3 + TILE_GAP_X);
-    if (col * (TILE_WIDTH*3 + TILE_GAP_X) + TILE_WIDTH*3 < x)
+    const int col = x / (TILE_WIDTH * 3 + TILE_GAP_X);
+    if (col * (TILE_WIDTH * 3 + TILE_GAP_X) + TILE_WIDTH * 3 < x) {
         return -1;
+    }
     const int row = y / (TILE_HEIGHT + TILE_GAP_Y);
-    if (row * (TILE_HEIGHT + TILE_GAP_Y) + TILE_HEIGHT < y)
+    if (row * (TILE_HEIGHT + TILE_GAP_Y) + TILE_HEIGHT < y) {
         return -1;
- 
+    }
+
     const int no = row * HINTS_COLS + col;
-    if (no >= (int)rules.size())
+    if (no >= (int)rules.size()) {
         return -1;
+    }
 
     return no;
 }
 
-bool HorHints::isActive(int ruleNo)
-{
-    if ((ruleNo < 0) || (ruleNo >= (int)rules.size()))
+bool HorHints::isActive(int ruleNo) {
+    if ((ruleNo < 0) || (ruleNo >= (int)rules.size())) {
         return false;
+    }
     Rule *r = showExcluded ? excludedRules[ruleNo] : rules[ruleNo];
     return r != nullptr;
 }
 
-
-void HorHints::save(std::ostream &stream)
-{
+void HorHints::save(std::ostream &stream) {
     const int cnt = numbersArr.size();
     writeInt(stream, cnt);
     for (int i = 0; i < cnt; i++) {
@@ -236,4 +228,3 @@ void HorHints::save(std::ostream &stream)
     }
     writeInt(stream, showExcluded ? 1 : 0);
 }
-

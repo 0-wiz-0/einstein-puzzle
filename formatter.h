@@ -16,69 +16,59 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __FORMATTER_H__
 #define __FORMATTER_H__
-
 
 #include <cstdarg>
 #include <string>
 #include <vector>
 
-
 class ArgValue;
 
-
 /// Localized message formatter
-class Formatter
-{
-    public:
-        enum CmdType {
-            EMPTY_CMD = 0,
-            TEXT_COMMAND,
-            INT_ARG,
-            STRING_ARG,
-            DOUBLE_ARG,
-            FLOAT_ARG
-        };
-        
-        typedef struct
-        {
-            CmdType type;
-            void *data;
-        } Command;
+class Formatter {
+  public:
+    enum CmdType {
+        EMPTY_CMD = 0,
+        TEXT_COMMAND,
+        INT_ARG,
+        STRING_ARG,
+        DOUBLE_ARG,
+        FLOAT_ARG
+    };
 
-    private:
-        int commandsCnt;
-        int argsCnt;
+    typedef struct {
+        CmdType type;
+        void *data;
+    } Command;
 
-        Command *commands;
-        
-        CmdType *args;
+  private:
+    int commandsCnt;
+    int argsCnt;
 
-    public:
-        /// Create localized message from message buffer.
-        /// \param data buffer contained message file
-        /// \param offset offset to message from buffer start
-        Formatter(unsigned char *data, int offset);
-        ~Formatter();
+    Command *commands;
 
-    public:
-        /// Get message text.
-        std::wstring getMessage() const;
-        
-        /// Fromat message
-        /// \param ap list of arguments
-        std::wstring format(va_list ap) const;
+    CmdType *args;
 
-    private:
-        std::wstring format(std::vector<ArgValue*> &argValues) const;
-       // prevent generation by compiler
-        Formatter(const Formatter&);
+  public:
+    /// Create localized message from message buffer.
+    /// \param data buffer contained message file
+    /// \param offset offset to message from buffer start
+    Formatter(unsigned char *data, int offset);
+    ~Formatter();
+
+  public:
+    /// Get message text.
+    std::wstring getMessage() const;
+
+    /// Fromat message
+    /// \param ap list of arguments
+    std::wstring format(va_list ap) const;
+
+  private:
+    std::wstring format(std::vector<ArgValue *> &argValues) const;
+    // prevent generation by compiler
+    Formatter(const Formatter &);
 };
 
-
-
-
 #endif
-

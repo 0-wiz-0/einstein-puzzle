@@ -16,16 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __OPTIONS_H__
 #define __OPTIONS_H__
 
-
 #include "widgets.h"
-
 
 void showOptionsWindow(Area *area);
 
-
 #endif
-

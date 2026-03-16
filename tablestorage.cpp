@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "tablestorage.h"
 
 #include "exceptions.h"
@@ -28,15 +27,13 @@
 #include <sys/stat.h>
 #endif
 
-TableStorage::TableStorage()
-{
+TableStorage::TableStorage() {
     std::wstring name = getFileName();
 #ifndef WIN32
     std::string sname(name.begin(), name.end());
     // HACK: make the config file and directory if they don't exist
     struct stat buffer;
-    if (stat (sname.c_str(), &buffer) != 0)
-    {
+    if (stat(sname.c_str(), &buffer) != 0) {
         system("mkdir ~/.einstein");
         system("touch ~/.einstein/einsteinrc");
     }
@@ -50,13 +47,11 @@ TableStorage::TableStorage()
     }
 }
 
-TableStorage::~TableStorage()
-{
+TableStorage::~TableStorage() {
     flush();
 }
 
-std::wstring TableStorage::getFileName()
-{
+std::wstring TableStorage::getFileName() {
 #ifndef WIN32
     return std::wstring(fromMbcs(getenv("HOME"))) + L"/.einstein/einsteinrc";
 #else
@@ -64,29 +59,23 @@ std::wstring TableStorage::getFileName()
 #endif
 }
 
-int TableStorage::get(const std::wstring &name, int dflt)
-{
+int TableStorage::get(const std::wstring &name, int dflt) {
     return table.getInt(name, dflt);
 }
 
-std::wstring TableStorage::get(const std::wstring &name, 
-            const std::wstring &dflt)
-{
+std::wstring TableStorage::get(const std::wstring &name,
+                               const std::wstring &dflt) {
     return table.getString(name, dflt);
 }
 
-void TableStorage::set(const std::wstring &name, int value)
-{
+void TableStorage::set(const std::wstring &name, int value) {
     table.setInt(name, value);
 }
 
-void TableStorage::set(const std::wstring &name, const std::wstring &value)
-{
+void TableStorage::set(const std::wstring &name, const std::wstring &value) {
     table.setString(name, value);
 }
 
-void TableStorage::flush()
-{
+void TableStorage::flush() {
     table.save(getFileName());
 }
-

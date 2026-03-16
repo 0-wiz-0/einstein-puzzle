@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "storage.h"
 
 #ifndef WIN32
@@ -25,27 +24,23 @@
 #include "regstorage.h"
 #endif
 
+class StorageHolder {
+  private:
+    Storage *storage;
 
-class StorageHolder
-{
-    private:
-        Storage *storage;
+  public:
+    StorageHolder();
+    ~StorageHolder();
 
-    public:
-        StorageHolder();
-        ~StorageHolder();
+  public:
+    Storage *getStorage() { return storage; }
 
-    public:
-        Storage* getStorage() { return storage; }
-
-    private:
-        // prevent generation by compiler
-        StorageHolder(const StorageHolder&);
+  private:
+    // prevent generation by compiler
+    StorageHolder(const StorageHolder &);
 };
 
-
-StorageHolder::StorageHolder()
-{
+StorageHolder::StorageHolder() {
 #ifndef WIN32
     storage = new TableStorage();
 #else
@@ -53,18 +48,12 @@ StorageHolder::StorageHolder()
 #endif
 }
 
-
-StorageHolder::~StorageHolder() 
-{ 
-    delete storage; 
+StorageHolder::~StorageHolder() {
+    delete storage;
 }
-
 
 static StorageHolder storageHolder;
 
-
-Storage* getStorage()
-{
+Storage *getStorage() {
     return storageHolder.getStorage();
 }
-

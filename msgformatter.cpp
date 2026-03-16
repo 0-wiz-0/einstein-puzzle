@@ -18,24 +18,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "msgformatter.h"
 
 #include "msgwriter.h"
 #include "table.h"
 #include "unicode.h"
 
-
 MsgFormatter::MsgFormatter() = default;
 
-void MsgFormatter::format(const std::wstring &fileName, Buffer &output)
-{
+void MsgFormatter::format(const std::wstring &fileName, Buffer &output) {
     Table table(toMbcs(fileName));
     MsgWriter msg;
-    for (const auto& i : table)
-    {
+    for (const auto &i : table) {
         msg.add(i.first, i.second->asString());
     }
     msg.save(output);
 }
-

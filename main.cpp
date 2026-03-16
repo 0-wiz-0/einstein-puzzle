@@ -29,28 +29,27 @@
 #include "unicode.h"
 #include "utils.h"
 
-#include <iostream>
 #include <SDL.h>
 #include <SDL_main.h>
 #include <SDL_ttf.h>
-
+#include <iostream>
 
 Screen screen;
 Random rndGen;
 
-
-static void initScreen()
-{
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
-        throw Exception(std::wstring(L"Error initializing SDL: ") + 
-                fromMbcs(SDL_GetError()));
+static void initScreen() {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+        throw Exception(std::wstring(L"Error initializing SDL: ")
+                        + fromMbcs(SDL_GetError()));
+    }
     atexit(SDL_Quit);
-    if (TTF_Init())
+    if (TTF_Init()) {
         throw Exception(L"Error initializing font engine");
+    }
     screen.setMode(getStorage()->get(L"fullscreen", 1) != 0);
     screen.setSize(getStorage()->get(L"screenSize", 1));
     screen.initCursors();
-    
+
     SDL_Surface *mouse = loadImage(L"cursor.bmp");
     SDL_SetColorKey(mouse, SDL_TRUE, SDL_MapRGB(mouse->format, 0, 0, 0));
     screen.setMouseImage(mouse);
@@ -63,31 +62,28 @@ static void initScreen()
 #endif
 }
 
-static void initAudio()
-{
+static void initAudio() {
     sound = new Sound();
     sound->setVolume((float)getStorage()->get(L"volume", 20) / 100.0f);
 }
 
-
 #ifdef __APPLE__
-static std::wstring getResourcesPath(const std::wstring& path)
-{
+static std::wstring getResourcesPath(const std::wstring &path) {
     int idx = path.find_last_of(L'/');
-    return path.substr(0, idx) + L"/../../"; 
+    return path.substr(0, idx) + L"/../../";
 }
 #endif
 
-static void loadResources(const std::wstring &selfPath)
-{
+static void loadResources(const std::wstring &selfPath) {
     StringList dirs;
 #ifdef WIN32
-    dirs.push_back(getStorage()->get(L"path", L"") + L"\\res"); 
+    dirs.push_back(getStorage()->get(L"path", L"") + L"\\res");
 #else
 #ifdef __APPLE__
     dirs.push_back(getResourcesPath(selfPath));
 #else
-    dirs.push_back("/usr" L"/share/einstein/res");
+    dirs.push_back("/usr"
+                   L"/share/einstein/res");
     dirs.push_back(fromMbcs(getenv("HOME")) + L"/.einstein/res");
 #endif
 #endif
@@ -97,38 +93,36 @@ static void loadResources(const std::wstring &selfPath)
     msg.load();
 }
 
-
 /*static void checkBetaExpire()
 {
     if (1124832535L + 60L*60L*24L*40L < time(nullptr)) {
         Font font(L"laudcn2.ttf", 16);
         Area area;
-        showMessageWindow(&area, L"darkpattern.bmp", 
-                700, 100, &font, 255,255,255, 
+        showMessageWindow(&area, L"darkpattern.bmp",
+                700, 100, &font, 255,255,255,
                 msg(L"expired"));
     }
 }*/
 
-
-
 #ifdef WIN32
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
+                   int nCmdShow)
 #else
 int main(int argc, char *argv[])
 #endif
 {
 #ifdef WIN32
     int argc;
-    LPSTR* argv = CommandLineToArgvA(GetCommandLineA(), &argc);
+    LPSTR *argv = CommandLineToArgvA(GetCommandLineA(), &argc);
 #else
     ensureDirExists(fromMbcs(getenv("HOME")) + std::wstring(L"/.einstein"));
 #endif
-    
+
     try {
         loadResources(fromUtf8(argv[0]));
         initScreen();
         initAudio();
-//        checkBetaExpire();
+        //        checkBetaExpire();
         menu();
         getStorage()->flush();
     } catch (Exception &e) {
@@ -137,7 +131,6 @@ int main(int argc, char *argv[])
         std::cerr << L"ERROR: Unknown exception" << std::endl;
     }
     screen.doneCursors();
-    
+
     return 0;
 }
-

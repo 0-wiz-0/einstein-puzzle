@@ -16,55 +16,52 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "sound.h"
 
 #include "resources.h"
 
-#include <iostream>
 #include <SDL_events.h>
-
+#include <iostream>
 
 Sound *sound;
 
-
-Sound::Sound()
-    : enableFx(false), volume(0)
-{
+Sound::Sound() : enableFx(false), volume(0) {
     int audio_rate = 22050;
     Uint16 audio_format = AUDIO_S16; /* 16-bit stereo */
     int audio_channels = 2;
     int audio_buffers = 1024;
-    disabled = Mix_OpenAudio(audio_rate, audio_format, audio_channels, 
-                audio_buffers);
-    if (disabled)
+    disabled = Mix_OpenAudio(audio_rate, audio_format, audio_channels,
+                             audio_buffers);
+    if (disabled) {
         std::cout << "Audio is disabled" << std::endl;
+    }
 }
 
-Sound::~Sound()
-{
-    if (! disabled)
+Sound::~Sound() {
+    if (!disabled) {
         Mix_CloseAudio();
-    for (auto& i : chunkCache)
+    }
+    for (auto &i : chunkCache) {
         Mix_FreeChunk(i.second);
+    }
     Mix_CloseAudio();
 }
 
-
-void Sound::play(const std::wstring &name)
-{
-    if (disabled || (! enableFx))
+void Sound::play(const std::wstring &name) {
+    if (disabled || (!enableFx)) {
         return;
-    
+    }
+
     Mix_Chunk *chunk = nullptr;
-    
+
     ChunkMap::iterator i = chunkCache.find(name);
-    if (i != chunkCache.end())
+    if (i != chunkCache.end()) {
         chunk = (*i).second;
+    }
     else {
         ResDataHolder data(name);
-        chunk = Mix_LoadWAV_RW(SDL_RWFromMem(data.getData(), data.getSize()), 
-                0);
+        chunk
+            = Mix_LoadWAV_RW(SDL_RWFromMem(data.getData(), data.getSize()), 0);
         chunkCache[name] = chunk;
     }
 
@@ -75,9 +72,7 @@ void Sound::play(const std::wstring &name)
     SDL_PumpEvents();
 }
 
-void Sound::setVolume(float v)
-{
+void Sound::setVolume(float v) {
     volume = v;
     enableFx = 0.01 < volume;
 }
-

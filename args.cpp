@@ -2,30 +2,24 @@
 
 #ifdef WIN32
 // http://alter.org.ua/docs/win/args/
-PCHAR*
-CommandLineToArgvA(
-    PCHAR CmdLine,
-    int* _argc
-    )
-{
-    PCHAR* argv;
-    PCHAR  _argv;
-    ULONG   len;
-    ULONG   argc;
-    CHAR   a;
-    ULONG   i, j;
+PCHAR *CommandLineToArgvA(PCHAR CmdLine, int *_argc) {
+    PCHAR *argv;
+    PCHAR _argv;
+    ULONG len;
+    ULONG argc;
+    CHAR a;
+    ULONG i, j;
 
-    BOOLEAN  in_QM;
-    BOOLEAN  in_TEXT;
-    BOOLEAN  in_SPACE;
+    BOOLEAN in_QM;
+    BOOLEAN in_TEXT;
+    BOOLEAN in_SPACE;
 
     len = strlen(CmdLine);
-    i = ((len+2)/2)*sizeof(PVOID) + sizeof(PVOID);
+    i = ((len + 2) / 2) * sizeof(PVOID) + sizeof(PVOID);
 
-    argv = (PCHAR*)GlobalAlloc(GMEM_FIXED,
-        i + (len+2)*sizeof(CHAR));
+    argv = (PCHAR *)GlobalAlloc(GMEM_FIXED, i + (len + 2) * sizeof(CHAR));
 
-    _argv = (PCHAR)(((PUCHAR)argv)+i);
+    _argv = (PCHAR)(((PUCHAR)argv) + i);
 
     argc = 0;
     argv[argc] = _argv;
@@ -35,21 +29,23 @@ CommandLineToArgvA(
     i = 0;
     j = 0;
 
-    while( a = CmdLine[i] ) {
-        if(in_QM) {
-            if(a == '\"') {
+    while (a = CmdLine[i]) {
+        if (in_QM) {
+            if (a == '\"') {
                 in_QM = FALSE;
-            } else {
+            }
+            else {
                 _argv[j] = a;
                 j++;
             }
-        } else {
-            switch(a) {
+        }
+        else {
+            switch (a) {
             case '\"':
                 in_QM = TRUE;
                 in_TEXT = TRUE;
-                if(in_SPACE) {
-                    argv[argc] = _argv+j;
+                if (in_SPACE) {
+                    argv[argc] = _argv + j;
                     argc++;
                 }
                 in_SPACE = FALSE;
@@ -58,7 +54,7 @@ CommandLineToArgvA(
             case '\t':
             case '\n':
             case '\r':
-                if(in_TEXT) {
+                if (in_TEXT) {
                     _argv[j] = '\0';
                     j++;
                 }
@@ -67,8 +63,8 @@ CommandLineToArgvA(
                 break;
             default:
                 in_TEXT = TRUE;
-                if(in_SPACE) {
-                    argv[argc] = _argv+j;
+                if (in_SPACE) {
+                    argv[argc] = _argv + j;
                     argc++;
                 }
                 _argv[j] = a;

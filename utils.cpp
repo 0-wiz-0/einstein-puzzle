@@ -18,7 +18,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "utils.h"
 
 #include "exceptions.h"
@@ -33,222 +32,213 @@
 #include <fstream>
 #include <sys/time.h>
 
-//#ifndef WIN32
-#include <sys/types.h>
+// #ifndef WIN32
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
-//#endif
+// #endif
 
-
-int scaleUp(int i)
-{
+int scaleUp(int i) {
     return (int)(i * screen.getScale());
 }
 
-int scaleDown(int i)
-{
+int scaleDown(int i) {
     return (int)(i / screen.getScale());
 }
 
-
-SDL_Surface* scaleUp(SDL_Surface* tile)
-{
+SDL_Surface *scaleUp(SDL_Surface *tile) {
     return scaleTo(tile, scaleUp(tile->w), scaleUp(tile->h));
 }
 
-SDL_Surface* scaleDown(SDL_Surface* tile)
-{
+SDL_Surface *scaleDown(SDL_Surface *tile) {
     return scaleTo(tile, scaleDown(tile->w), scaleDown(tile->h));
 }
 
-SDL_Surface* scaleTo(SDL_Surface* tile, int width, int height)
-{
+SDL_Surface *scaleTo(SDL_Surface *tile, int width, int height) {
     SDL_Surface *s = makeSWSurface(width, height);
-    SDL_Rect src = { 0, 0, tile->w, tile->h };
-    SDL_Rect dst = { 0, 0, s->w, s->h };
+    SDL_Rect src = {0, 0, tile->w, tile->h};
+    SDL_Rect dst = {0, 0, s->w, s->h};
     SDL_SoftStretch(tile, &src, s, &dst);
-    
+
     return s;
 }
 
-void blitDraw(int x, int y, SDL_Surface *src, SDL_Surface *dst)
-{
-    SDL_Rect s = { 0, 0, src->w, src->h };
-    SDL_Rect d = { x, y, src->w, src->h };
+void blitDraw(int x, int y, SDL_Surface *src, SDL_Surface *dst) {
+    SDL_Rect s = {0, 0, src->w, src->h};
+    SDL_Rect d = {x, y, src->w, src->h};
     SDL_BlitSurface(src, &s, dst, &d);
 }
 
-void drawTiled(const std::wstring &name, SDL_Surface *s)
-{
+void drawTiled(const std::wstring &name, SDL_Surface *s) {
     SDL_Surface *tile = loadImage(name);
-    SDL_Rect src = { 0, 0, tile->w, tile->h };
-    SDL_Rect dst = { 0, 0, tile->w, tile->h };
-    for (int y = 0; y < s->h; y += tile->h)
-    {
+    SDL_Rect src = {0, 0, tile->w, tile->h};
+    SDL_Rect dst = {0, 0, tile->w, tile->h};
+    for (int y = 0; y < s->h; y += tile->h) {
         for (int x = 0; x < s->w; x += tile->w) {
             dst.x = x;
             dst.y = y;
-            SDL_BlitSurface(tile, &src,s, &dst);
+            SDL_BlitSurface(tile, &src, s, &dst);
         }
     }
     SDL_FreeSurface(tile);
 }
 
-SDL_Surface* makeSWSurface(int width, int height)
-{
+SDL_Surface *makeSWSurface(int width, int height) {
     SDL_PixelFormat *fmt = screen.getFormat();
-    return SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 
-                                fmt->BitsPerPixel, fmt->Rmask, fmt->Gmask,
-                                fmt->Bmask, fmt->Amask);
+    return SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, fmt->BitsPerPixel,
+                                fmt->Rmask, fmt->Gmask, fmt->Bmask, fmt->Amask);
 }
 
-int getCornerPixel(SDL_Surface *surface)
-{
+int getCornerPixel(SDL_Surface *surface) {
     SDL_LockSurface(surface);
     int bpp = surface->format->BytesPerPixel;
-    Uint8 *p = (Uint8*)surface->pixels;
+    Uint8 *p = (Uint8 *)surface->pixels;
     int pixel = 0;
     switch (bpp) {
-        case 1: pixel = *p;  break;
-        case 2: pixel = *(Uint16 *)p; break;
-        case 3:
-            if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-                pixel = p[0] << 16 | p[1] << 8 | p[2];
-            else
-                pixel = p[0] | p[1] << 8 | p[2] << 16;
-            break;
-        case 4: pixel = *(Uint32 *)p; break;
-        default: pixel = 0;       /* shouldn't happen, but avoids warnings */
+    case 1:
+        pixel = *p;
+        break;
+    case 2:
+        pixel = *(Uint16 *)p;
+        break;
+    case 3:
+        if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+            pixel = p[0] << 16 | p[1] << 8 | p[2];
+        }
+        else {
+            pixel = p[0] | p[1] << 8 | p[2] << 16;
+        }
+        break;
+    case 4:
+        pixel = *(Uint32 *)p;
+        break;
+    default:
+        pixel = 0; /* shouldn't happen, but avoids warnings */
     }
     SDL_UnlockSurface(surface);
     return pixel;
 }
 
-
-
-SDL_Surface* loadImage(const std::wstring &name, bool transparent)
-{
+SDL_Surface *loadImage(const std::wstring &name, bool transparent) {
     int size;
     void *bmp = resources->getRef(name, size);
-    if (! bmp)
+    if (!bmp) {
         throw Exception(name + L" is not found");
+    }
 
     SDL_RWops *op = SDL_RWFromMem(bmp, size);
     SDL_Surface *s = SDL_LoadBMP_RW(op, 0);
     SDL_FreeRW(op);
     resources->delRef(bmp);
-    if (! s)
+    if (!s) {
         throw Exception(L"Error loading " + name);
-    if(transparent)
+    }
+    if (transparent) {
         SDL_SetColorKey(s, SDL_TRUE, getCornerPixel(s));
+    }
     return s;
 }
-
 
 #ifdef WIN32
 #include <sys/timeb.h>
 
-int gettimeofday(struct timeval* tp, int* /*tz*/) 
-{
+int gettimeofday(struct timeval *tp, int * /*tz*/) {
     struct timeb tb;
     ftime(&tb);
     tp->tv_sec = tb.time;
-    tp->tv_usec = 1000*tb.millitm;
+    tp->tv_usec = 1000 * tb.millitm;
     return 0;
 }
 
-int gettimeofday(struct timeval* tp, struct timezone* /*tz*/) 
-{
-    return gettimeofday(tp, (int*)nullptr);
+int gettimeofday(struct timeval *tp, struct timezone * /*tz*/) {
+    return gettimeofday(tp, (int *)nullptr);
 }
 #endif
 
-
-
-int gettimeofday(struct timeval* tp)
-{
+int gettimeofday(struct timeval *tp) {
 #ifdef WIN32
-    return gettimeofday(tp, (int*)nullptr);
+    return gettimeofday(tp, (int *)nullptr);
 #else
     struct timezone tz;
     return gettimeofday(tp, &tz);
 #endif
 }
 
-
-void setPixel(SDL_Surface *s, int x, int y, int r, int g, int b)
-{
+void setPixel(SDL_Surface *s, int x, int y, int r, int g, int b) {
     int bpp = s->format->BytesPerPixel;
     Uint32 pixel = SDL_MapRGB(s->format, r, g, b);
     /* Here p is the address to the pixel we want to set */
-    Uint8 *p = (Uint8*)s->pixels + y * s->pitch + x * bpp;
+    Uint8 *p = (Uint8 *)s->pixels + y * s->pitch + x * bpp;
 
     switch (bpp) {
-        case 1:
-            *p = pixel;
-            break;
-        case 2:
-            *(Uint16 *)p = pixel;
-            break;
-        case 3:
-            if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
-                p[0] = (pixel >> 16) & 0xff;
-                p[1] = (pixel >> 8) & 0xff;
-                p[2] = pixel & 0xff;
-            } else {
-                p[0] = pixel & 0xff;
-                p[1] = (pixel >> 8) & 0xff;
-                p[2] = (pixel >> 16) & 0xff;
-            }
-            break;
-        case 4:
-            *(Uint32 *)p = pixel;
-            break;
+    case 1:
+        *p = pixel;
+        break;
+    case 2:
+        *(Uint16 *)p = pixel;
+        break;
+    case 3:
+        if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+            p[0] = (pixel >> 16) & 0xff;
+            p[1] = (pixel >> 8) & 0xff;
+            p[2] = pixel & 0xff;
+        }
+        else {
+            p[0] = pixel & 0xff;
+            p[1] = (pixel >> 8) & 0xff;
+            p[2] = (pixel >> 16) & 0xff;
+        }
+        break;
+    case 4:
+        *(Uint32 *)p = pixel;
+        break;
     }
 }
 
-
-void getPixel(SDL_Surface *surface, int x, int y, 
-        Uint8 *r, Uint8 *g, Uint8 *b)
-{
+void getPixel(SDL_Surface *surface, int x, int y, Uint8 *r, Uint8 *g,
+              Uint8 *b) {
     int bpp = surface->format->BytesPerPixel;
     /* Here p is the address to the pixel we want to retrieve */
     Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
 
     Uint32 pixel;
     switch (bpp) {
-        case 1: pixel = *p;  break;
-        case 2: pixel = *(Uint16 *)p; break;
-        case 3:
-            if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-                pixel = p[0] << 16 | p[1] << 8 | p[2];
-            else
-                pixel = p[0] | p[1] << 8 | p[2] << 16;
-            break;
-        case 4: pixel = *(Uint32 *)p; break;
-        default: pixel = 0;       /* shouldn't happen, but avoids warnings */
+    case 1:
+        pixel = *p;
+        break;
+    case 2:
+        pixel = *(Uint16 *)p;
+        break;
+    case 3:
+        if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+            pixel = p[0] << 16 | p[1] << 8 | p[2];
+        }
+        else {
+            pixel = p[0] | p[1] << 8 | p[2] << 16;
+        }
+        break;
+    case 4:
+        pixel = *(Uint32 *)p;
+        break;
+    default:
+        pixel = 0; /* shouldn't happen, but avoids warnings */
     }
     SDL_GetRGB(pixel, surface->format, r, g, b);
 }
 
-
 static int gammaTable[256];
 static double lastGamma = -1.0;
 
-
-int adjustBrightness(int i, double k)
-{
+int adjustBrightness(int i, double k) {
     int r = (int)(255.0 * pow((double)i / 255.0, 1.0 / k) + 0.5);
-    if (r > 255)
-    {
+    if (r > 255) {
         r = 255;
     }
-    
+
     return r;
 }
 
-void setGamma(double k)
-{
+void setGamma(double k) {
     if (lastGamma != k) {
         for (int i = 0; i <= 255; i++) {
             gammaTable[i] = adjustBrightness(i, k);
@@ -257,65 +247,59 @@ void setGamma(double k)
     }
 }
 
-void adjustBrightness(int *r, int *g, int *b, double k)
-{
-    if (k == lastGamma)
-    {
+void adjustBrightness(int *r, int *g, int *b, double k) {
+    if (k == lastGamma) {
         *r = gammaTable[*r];
         *g = gammaTable[*g];
         *b = gammaTable[*b];
     }
-    else
-    {
+    else {
         *r = adjustBrightness(*r, k);
         *g = adjustBrightness(*g, k);
         *b = adjustBrightness(*b, k);
     }
 }
 
-void adjustBrightness(SDL_Surface *image, int x, int y, double k)
-{
+void adjustBrightness(SDL_Surface *image, int x, int y, double k) {
     setGamma(k);
-    
+
     Uint8 r, g, b;
     getPixel(image, x, y, &r, &g, &b);
     setPixel(image, x, y, gammaTable[r], gammaTable[g], gammaTable[b]);
 }
 
-
-SDL_Surface* adjustBrightness(SDL_Surface *image, double k, bool transparent)
-{
+SDL_Surface *adjustBrightness(SDL_Surface *image, double k, bool transparent) {
     setGamma(k);
 
-    SDL_Surface *s = SDL_CreateRGBSurface(0, image->w, image->h, 32,
-        0x00ff0000,0x0000ff00, 0x000000ff, 0xff000000);
+    SDL_Surface *s = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0x00ff0000,
+                                          0x0000ff00, 0x000000ff, 0xff000000);
     SDL_BlitSurface(image, NULL, s, NULL);
 
     SDL_LockSurface(s);
-    
+
     Uint8 r, g, b;
-    for (int j = 0; j < s->h; j++)
+    for (int j = 0; j < s->h; j++) {
         for (int i = 0; i < s->w; i++) {
             getPixel(s, i, j, &r, &g, &b);
             setPixel(s, i, j, gammaTable[r], gammaTable[g], gammaTable[b]);
         }
-    
+    }
+
     SDL_UnlockSurface(s);
 
-    if (transparent)
+    if (transparent) {
         SDL_SetColorKey(s, SDL_TRUE, getCornerPixel(s));
+    }
 
     return s;
 }
 
-bool isInRect(int evX, int evY, int x, int y, int w, int h)
-{
-    return ((evX >= scaleUp(x)) && (evX < scaleUp(x + w)) 
-                    && (evY >= scaleUp(y)) && (evY < scaleUp(y + h)));
+bool isInRect(int evX, int evY, int x, int y, int w, int h) {
+    return ((evX >= scaleUp(x)) && (evX < scaleUp(x + w)) && (evY >= scaleUp(y))
+            && (evY < scaleUp(y + h)));
 }
 
-std::wstring secToStr(int time)
-{
+std::wstring secToStr(int time) {
     int hours = time / 3600;
     int v = time - hours * 3600;
     int minutes = v / 60;
@@ -331,57 +315,57 @@ std::wstring secToStr(int time)
     return buf;
 }
 
-
-void showMessageWindow(Area *parentArea, const std::wstring &pattern, 
-        int width, int height, Font *font, int r, int g, int b,
-        const std::wstring &msg)
-{
+void showMessageWindow(Area *parentArea, const std::wstring &pattern, int width,
+                       int height, Font *font, int r, int g, int b,
+                       const std::wstring &msg) {
     Area area;
 
     int x = (screen.getWidth() - width) / 2;
     int y = (screen.getHeight() - height) / 2;
-    
+
     area.add(parentArea);
     area.add(new Window(x, y, width, height, pattern, 6));
     area.add(new Label(font, x, y, width, height, Label::ALIGN_CENTER,
-                Label::ALIGN_MIDDLE, r, g, b, msg));
+                       Label::ALIGN_MIDDLE, r, g, b, msg));
     area.add(new AnyKeyAccel());
     area.run();
     sound->play(L"click.wav");
 }
 
-
 void drawBevel(SDL_Surface *s, int left, int top, int width, int height,
-        bool raised, int size)
-{
+               bool raised, int size) {
     double k, f, kAdv, fAdv;
     if (raised) {
         k = 2.6;
         f = 0.1;
         kAdv = -0.2;
         fAdv = 0.1;
-    } else {
+    }
+    else {
         f = 2.6;
         k = 0.1;
         fAdv = -0.2;
         kAdv = 0.1;
     }
     for (int i = 0; i < size; i++) {
-        for (int j = i; j < height - i - 1; j++)
+        for (int j = i; j < height - i - 1; j++) {
             adjustBrightness(s, left + i, top + j, k);
-        for (int j = i; j < width - i; j++)
+        }
+        for (int j = i; j < width - i; j++) {
             adjustBrightness(s, left + j, top + i, k);
-        for (int j = i+1; j < height - i; j++)
+        }
+        for (int j = i + 1; j < height - i; j++) {
             adjustBrightness(s, left + width - i - 1, top + j, f);
-        for (int j = i; j < width - i - 1; j++)
+        }
+        for (int j = i; j < width - i - 1; j++) {
             adjustBrightness(s, left + j, top + height - i - 1, f);
+        }
         k += kAdv;
         f += fAdv;
     }
 }
 
-SDL_Surface* makeBox(int width, int height, const std::wstring &bg)
-{
+SDL_Surface *makeBox(int width, int height, const std::wstring &bg) {
     SDL_Surface *s = makeSWSurface(width, height);
 
     drawTiled(bg, s);
@@ -390,21 +374,22 @@ SDL_Surface* makeBox(int width, int height, const std::wstring &bg)
     drawBevel(s, 0, 0, width, height, false, 1);
     drawBevel(s, 1, 1, width - 2, height - 2, true, 1);
     SDL_UnlockSurface(s);
-    
+
     return s;
 }
 
-//#ifndef WIN32
+// #ifndef WIN32
 
-void ensureDirExists(const std::wstring &fileName)
-{
+void ensureDirExists(const std::wstring &fileName) {
     std::string s(toMbcs(fileName));
     struct stat buf;
-    if (! stat(s.c_str(), &buf)) {
-        if (! S_ISDIR(buf.st_mode))
+    if (!stat(s.c_str(), &buf)) {
+        if (!S_ISDIR(buf.st_mode)) {
             unlink(s.c_str());
-        else
+        }
+        else {
             return;
+        }
     }
 #ifndef WIN32
     mkdir(s.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
@@ -422,61 +407,57 @@ void ensureDirExists(const std::wstring &fileName)
 
 #endif*/
 
-int readInt(std::istream &stream)
-{
-    if (stream.fail())
+int readInt(std::istream &stream) {
+    if (stream.fail()) {
         throw Exception(L"Error reading string");
+    }
     unsigned char buf[4];
-    stream.read((char*)buf, 4);
-    if (stream.fail())
+    stream.read((char *)buf, 4);
+    if (stream.fail()) {
         throw Exception(L"Error reading string");
-    return buf[0] + buf[1] * 256 + buf[2] * 256 * 256 + 
-        buf[3] * 256 * 256 * 256;
+    }
+    return buf[0] + buf[1] * 256 + buf[2] * 256 * 256
+           + buf[3] * 256 * 256 * 256;
 }
 
-
-std::wstring readString(std::istream &stream)
-{
+std::wstring readString(std::istream &stream) {
     std::string str;
-    
-    if (stream.fail())
+
+    if (stream.fail()) {
         throw Exception(L"Error reading string");
-    
+    }
+
     char c = stream.get();
-    while (c && (! stream.fail())) {
+    while (c && (!stream.fail())) {
         str += c;
         c = stream.get();
     }
 
-    if (stream.fail())
+    if (stream.fail()) {
         throw Exception(L"Error reading string");
+    }
 
     return fromUtf8(str);
 }
 
-void writeInt(std::ostream &stream, int v)
-{
+void writeInt(std::ostream &stream, int v) {
     unsigned char b[4];
 
-    for (unsigned char& i : b)
-    {
+    for (unsigned char &i : b) {
         int ib = v & 0xFF;
         v = v >> 8;
         i = ib;
     }
-    
-    stream.write((char*)&b, 4);
+
+    stream.write((char *)&b, 4);
 }
 
-void writeString(std::ostream &stream, const std::wstring &value)
-{
+void writeString(std::ostream &stream, const std::wstring &value) {
     std::string s(toUtf8(value));
     stream.write(s.c_str(), s.length() + 1);
 }
 
-int readInt(unsigned char *buf)
-{
-    return buf[0] + buf[1] * 256 + buf[2] * 256 * 256 + 
-        buf[3] * 256 * 256 * 256;
+int readInt(unsigned char *buf) {
+    return buf[0] + buf[1] * 256 + buf[2] * 256 * 256
+           + buf[3] * 256 * 256 * 256;
 }
-

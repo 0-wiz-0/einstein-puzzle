@@ -16,65 +16,56 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __TOKENIZER_H__
 #define __TOKENIZER_H__
-
 
 #include <list>
 #include <string>
 
-
 class Tokenizer;
 
-
-class Token
-{
+class Token {
     friend class Tokenizer;
 
-    public:
-        enum Type {
-            Word,
-            Para,
-            Eof
-        };
+  public:
+    enum Type {
+        Word,
+        Para,
+        Eof
+    };
 
-    private:
-        Type type;
-        std::wstring content;
+  private:
+    Type type;
+    std::wstring content;
 
-    private:
-        explicit Token(Type type) { this->type = type; }
-        Token(Type type, const std::wstring &content): content(content) {
-            this->type = type;
-        }
+  private:
+    explicit Token(Type type) { this->type = type; }
+    Token(Type type, const std::wstring &content) : content(content) {
+        this->type = type;
+    }
 
-    public:
-        Type getType() const { return type; }
-        const std::wstring& getContent() const { return content; }
-        std::wstring toString() const;
+  public:
+    Type getType() const { return type; }
+    const std::wstring &getContent() const { return content; }
+    std::wstring toString() const;
 };
 
+class Tokenizer {
+  private:
+    std::wstring text;
+    int currentPos;
+    std::list<Token> stack;
 
-class Tokenizer
-{
-    private:
-        std::wstring text;
-        int currentPos;
-        std::list<Token> stack;
+  public:
+    explicit Tokenizer(const std::wstring &s) : text(s) { currentPos = 0; }
 
-    public:
-        explicit Tokenizer(const std::wstring &s): text(s) { currentPos = 0; }
+  public:
+    Token getNextToken();
+    void unget(const Token &token);
+    bool isFinished();
 
-    public:
-        Token getNextToken();
-        void unget(const Token &token);
-        bool isFinished();
-
-    private:
-        bool skipSpaces(bool notSearch);
+  private:
+    bool skipSpaces(bool notSearch);
 };
-
 
 #endif
-

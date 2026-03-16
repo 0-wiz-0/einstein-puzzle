@@ -16,31 +16,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __STORAGE_H__
 #define __STORAGE_H__
 
-
 #include <string>
 
+class Storage {
+  public:
+    virtual ~Storage() = default;
 
-class Storage
-{
-    public:
-        virtual ~Storage() = default;
-
-    public:
-        virtual int get(const std::wstring &name, int dflt) = 0;
-        virtual std::wstring get(const std::wstring &name, 
-                const std::wstring &dflt) = 0;
-        virtual void set(const std::wstring &name, int value) = 0;
-        virtual void set(const std::wstring &name, const std::wstring &value) = 0;
-        virtual void flush() = 0;
+  public:
+    virtual int get(const std::wstring &name, int dflt) = 0;
+    virtual std::wstring get(const std::wstring &name, const std::wstring &dflt)
+        = 0;
+    virtual void set(const std::wstring &name, int value) = 0;
+    virtual void set(const std::wstring &name, const std::wstring &value) = 0;
+    virtual void flush() = 0;
 };
 
-
-Storage* getStorage();
-
+Storage *getStorage();
 
 #endif
-

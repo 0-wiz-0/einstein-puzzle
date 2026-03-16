@@ -18,7 +18,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "descr.h"
 
 #include "convert.h"
@@ -27,159 +26,146 @@
 #include "utils.h"
 #include "widgets.h"
 
-#include <string>
+#include "convert.h"
+#include "main.h"
+#include "messages.h"
+#include "storage.h"
+#include "tokenizer.h"
+#include "unicode.h"
+#include "utils.h"
+#include "widgets.h"
 #include <list>
 #include <map>
-#include "widgets.h"
-#include "unicode.h"
-#include "messages.h"
-#include "convert.h"
-#include "utils.h"
-#include "tokenizer.h"
-#include "storage.h"
-#include "main.h"
+#include <string>
 
-#define WIDTH          600
-#define HEIGHT         500
-#define CLIENT_WIDTH   570
-#define CLIENT_HEIGHT  390
-#define START_X        115
-#define START_Y        100
+#define WIDTH 600
+#define HEIGHT 500
+#define CLIENT_WIDTH 570
+#define CLIENT_HEIGHT 390
+#define START_X 115
+#define START_Y 100
 
+class TextPage {
+  private:
+    std::vector<Widget *> widgets;
 
-class TextPage
-{
-    private:
-        std::vector<Widget*> widgets;
+  public:
+    TextPage() = default;
+    ~TextPage();
 
-    public:
-        TextPage() = default;
-        ~TextPage();
-
-    public:
-        Widget* getWidget(int no) { return widgets[no]; }
-        size_t getWidgetsCount() const { return widgets.size(); }
-        void add(Widget *widget) { widgets.push_back(widget); }
-        bool isEmpty() const { return widgets.empty(); }
+  public:
+    Widget *getWidget(int no) { return widgets[no]; }
+    size_t getWidgetsCount() const { return widgets.size(); }
+    void add(Widget *widget) { widgets.push_back(widget); }
+    bool isEmpty() const { return widgets.empty(); }
 };
 
+class TextParser {
+  private:
+    Tokenizer tokenizer;
+    std::vector<TextPage *> pages;
+    Font &font;
+    int spaceWidth;
+    int charHeight;
+    std::map<std::wstring, SDL_Surface *> images;
+    int offsetX;
+    int offsetY;
+    int pageWidth;
+    int pageHeight;
 
-class TextParser
-{
-    private:
-        Tokenizer tokenizer;
-        std::vector<TextPage*> pages;
-        Font &font;
-        int spaceWidth;
-        int charHeight;
-        std::map<std::wstring, SDL_Surface*> images;
-        int offsetX;
-        int offsetY;
-        int pageWidth;
-        int pageHeight;
+  public:
+    TextParser(const std::wstring &text, Font &font, int x, int y, int width,
+               int height);
+    ~TextParser();
 
-    public:
-        TextParser(const std::wstring &text, Font &font,
-                int x, int y, int width, int height);
-        ~TextParser();
+  public:
+    TextPage *getPage(unsigned int no);
+    size_t getPageCount();
 
-    public:
-        TextPage* getPage(unsigned int no);
-        size_t getPageCount();
-
-    private:
-        void addLine(TextPage *page, std::wstring &line, int &curPosY, 
-                int &lineWidth);
-        void parseNextPage();
-        bool isImage(const std::wstring &name);
-        std::wstring keywordToImage(const std::wstring &name);
-        SDL_Surface* getImage(const std::wstring &name);
+  private:
+    void addLine(TextPage *page, std::wstring &line, int &curPosY,
+                 int &lineWidth);
+    void parseNextPage();
+    bool isImage(const std::wstring &name);
+    std::wstring keywordToImage(const std::wstring &name);
+    SDL_Surface *getImage(const std::wstring &name);
 };
-
 
 class CursorCommand;
 
-
 // Otobrazhaet pravila igry na ekran
-class Description: public Area
-{
-    private:
-        typedef std::list<Widget *> WidgetsList;
-        WidgetsList widgets;
+class Description : public Area {
+  private:
+    typedef std::list<Widget *> WidgetsList;
+    WidgetsList widgets;
 
-        Button *btnPrev;
-        Button *btnNext;
-        
-        //std::vector<RulesPage *> pages;   // Spisok stranits teksta
-        size_t currentPage;                 // Tekuschaja stranitsa dlja prosmotra
+    Button *btnPrev;
+    Button *btnNext;
 
-        Font *titleFont;                    // Shrift dlja risovanija zagolovka okna
-        Font *buttonFont;                   // Shrift dlja risovanija knopok v okne
-        Font *textFont;                     // Shrift dlja risovanija teksta
+    // std::vector<RulesPage *> pages;   // Spisok stranits teksta
+    size_t currentPage; // Tekuschaja stranitsa dlja prosmotra
 
-        unsigned int textHeight;            // Vysota stroki teksta
-        TextParser *text;
-        
-    public:
-        explicit Description(Area *parentArea);
-        ~Description();
+    Font *titleFont;  // Shrift dlja risovanija zagolovka okna
+    Font *buttonFont; // Shrift dlja risovanija knopok v okne
+    Font *textFont;   // Shrift dlja risovanija teksta
 
-    public:
-        void run();
-        void updateInfo();                  // Vyvodit informatsiju na stranitsu
-        TextPage *getPage(unsigned int no) { return text->getPage(no); }
+    unsigned int textHeight; // Vysota stroki teksta
+    TextParser *text;
 
-    private:
-        void printPage();                   // Vyvodit tekuschuju stranitsu pravil
-        void deleteWidgets();               // Udaljaet neispol'zuemye metki i kartinki iz oblasti vyvoda informatsii (Area)
+  public:
+    explicit Description(Area *parentArea);
+    ~Description();
+
+  public:
+    void run();
+    void updateInfo(); // Vyvodit informatsiju na stranitsu
+    TextPage *getPage(unsigned int no) { return text->getPage(no); }
+
+  private:
+    void printPage();     // Vyvodit tekuschuju stranitsu pravil
+    void deleteWidgets(); // Udaljaet neispol'zuemye metki i kartinki iz oblasti
+                          // vyvoda informatsii (Area)
 };
 
+// Nuzhen pri nazhatii na knopku <NEXT> ili <PREV> v dialoge spiska pravil
+class CursorCommand : public Command {
+  private:
+    int step;                 // Cherez skol'ko stranits listat'
+    Description &description; // Ukazatel' na ob"ekt Description
+    size_t *value;            // Ukazatel' na tekuschij nomer stranitsy
 
-//Nuzhen pri nazhatii na knopku <NEXT> ili <PREV> v dialoge spiska pravil
-class CursorCommand: public Command
-{
-    private:
-        int step;                           // Cherez skol'ko stranits listat'
-        Description &description;           // Ukazatel' na ob"ekt Description
-        size_t *value;                      // Ukazatel' na tekuschij nomer stranitsy
+  public:
+    CursorCommand(int step, Description &d, size_t *v);
+    virtual ~CursorCommand() = default;
 
-    public:
-        CursorCommand(int step, Description &d, size_t *v);
-        virtual ~CursorCommand() = default;
-        
-    public:
-        void doAction() override;           // Obrabatyvaet sobytija
+  public:
+    void doAction() override; // Obrabatyvaet sobytija
 };
 
-
-
-void showDescription(Area *parentArea)
-{
+void showDescription(Area *parentArea) {
     Description d(parentArea);
     d.run();
 }
 
-
-
-Description::Description(Area *parentArea)
-{
+Description::Description(Area *parentArea) {
     currentPage = 0;
     add(parentArea, false);
     titleFont = new Font(L"nova.ttf", 26);
     buttonFont = new Font(L"laudcn2.ttf", 14);
     textFont = new Font(L"laudcn2.ttf", 16);
     textHeight = (int)(textFont->getHeight(L"A") * 1.0);
-    text = new TextParser(msg(L"rulesText"), *textFont, START_X, START_Y, 
-                CLIENT_WIDTH, CLIENT_HEIGHT);
-    
-    btnPrev = new Button(110, 515, 80, 25, buttonFont, 255, 255, 0, L"blue.bmp", msg(L"prev"),
-                                        new CursorCommand(-1, *this, &currentPage));
-    btnNext = new Button(200, 515, 80, 25, buttonFont, 255, 255, 0, L"blue.bmp", msg(L"next"), 
-                                        new CursorCommand(1, *this, &currentPage));
+    text = new TextParser(msg(L"rulesText"), *textFont, START_X, START_Y,
+                          CLIENT_WIDTH, CLIENT_HEIGHT);
+
+    btnPrev
+        = new Button(110, 515, 80, 25, buttonFont, 255, 255, 0, L"blue.bmp",
+                     msg(L"prev"), new CursorCommand(-1, *this, &currentPage));
+    btnNext
+        = new Button(200, 515, 80, 25, buttonFont, 255, 255, 0, L"blue.bmp",
+                     msg(L"next"), new CursorCommand(1, *this, &currentPage));
 }
 
-Description::~Description()
-{
+Description::~Description() {
     deleteWidgets();
     delete text;
     delete titleFont;
@@ -187,43 +173,41 @@ Description::~Description()
     delete textFont;
 }
 
-
-void Description::deleteWidgets()
-{
-    for (auto& widget : widgets)
+void Description::deleteWidgets() {
+    for (auto &widget : widgets) {
         remove(widget);
+    }
     widgets.clear();
 }
 
-
-void Description::updateInfo()
-{
+void Description::updateInfo() {
     deleteWidgets();
     printPage();
-    
+
     setVisible(btnPrev, (0 != currentPage));
     setVisible(btnNext, (currentPage < (text->getPageCount() - 1)));
-    
+
     draw();
 }
 
-void Description::run()
-{
+void Description::run() {
     add(new Window(100, 50, WIDTH, HEIGHT, L"blue.bmp"));
-    add(new Label(titleFont, 250, 60, 300, 40, Label::ALIGN_CENTER, Label::ALIGN_MIDDLE, 255, 255, 0, msg(L"rules")));
+    add(new Label(titleFont, 250, 60, 300, 40, Label::ALIGN_CENTER,
+                  Label::ALIGN_MIDDLE, 255, 255, 0, msg(L"rules")));
     add(btnNext);
     ExitCommand exitCmd(*this);
-    add(new Button(610, 515, 80, 25, buttonFont, 255, 255, 0, L"blue.bmp", msg(L"close"), &exitCmd));
+    add(new Button(610, 515, 80, 25, buttonFont, 255, 255, 0, L"blue.bmp",
+                   msg(L"close"), &exitCmd));
     add(new KeyAccel(SDLK_ESCAPE, &exitCmd));
     printPage();
     Area::run();
 }
 
-void Description::printPage()
-{
+void Description::printPage() {
     TextPage *page = text->getPage(currentPage);
-    if (! page)
+    if (!page) {
         return;
+    }
     const int len = page->getWidgetsCount();
     for (int i = 0; i < len; i++) {
         Widget *w = page->getWidget(i);
@@ -234,17 +218,16 @@ void Description::printPage()
     }
 }
 
-CursorCommand::CursorCommand(int s, Description &d, size_t *v):
-                description(d)
-{
+CursorCommand::CursorCommand(int s, Description &d, size_t *v)
+    : description(d) {
     step = s;
     value = v;
 }
 
-void CursorCommand::doAction()
-{
-    if ((! *value) && (0 > step))
+void CursorCommand::doAction() {
+    if ((!*value) && (0 > step)) {
         return;
+    }
     const unsigned int newPageNo = *value + step;
     TextPage *page = description.getPage(newPageNo);
     if (page) {
@@ -253,79 +236,72 @@ void CursorCommand::doAction()
     }
 }
 
-
-TextPage::~TextPage()
-{
-    for (auto& widget : widgets)
+TextPage::~TextPage() {
+    for (auto &widget : widgets) {
         delete widget;
+    }
 }
 
-
-TextParser::TextParser(const std::wstring &text, Font &font,
-        int x, int y, int width, int height): tokenizer(text), font(font)
-{
+TextParser::TextParser(const std::wstring &text, Font &font, int x, int y,
+                       int width, int height)
+    : tokenizer(text), font(font) {
     spaceWidth = font.getWidth(L' ');
     charHeight = font.getWidth(L'A');
     offsetX = x;
     offsetY = y;
     pageWidth = width;
     pageHeight = height;
-  
-    while (! tokenizer.isFinished())
+
+    while (!tokenizer.isFinished()) {
         parseNextPage();
+    }
 }
 
-
-TextParser::~TextParser()
-{
-    for (auto& page : pages)
+TextParser::~TextParser() {
+    for (auto &page : pages) {
         delete page;
-    for (auto& image : images)
+    }
+    for (auto &image : images) {
         delete image.second;
+    }
 }
-
 
 void TextParser::addLine(TextPage *page, std::wstring &line, int &curPosY,
-        int &lineWidth)
-{
+                         int &lineWidth) {
     if (0 < line.length()) {
         page->add(new Label(&font, offsetX, offsetY + curPosY,
-                    getStorage()->get(L"text_red", 0),
-                    getStorage()->get(L"text_green", 0),
-                    getStorage()->get(L"text_blue", 100),
-                    line, false));
+                            getStorage()->get(L"text_red", 0),
+                            getStorage()->get(L"text_green", 0),
+                            getStorage()->get(L"text_blue", 100), line, false));
         line.clear();
         curPosY += 10 + charHeight;
         lineWidth = 0;
     }
 }
 
-bool TextParser::isImage(const std::wstring &name)
-{
+bool TextParser::isImage(const std::wstring &name) {
     const int len = name.length();
     return (3 < len) && (L'$' == name[0]) && (L'$' == name[len - 1]);
 }
 
-std::wstring TextParser::keywordToImage(const std::wstring &name)
-{
+std::wstring TextParser::keywordToImage(const std::wstring &name) {
     return name.substr(1, name.length() - 2);
 }
 
-SDL_Surface* TextParser::getImage(const std::wstring &name)
-{
+SDL_Surface *TextParser::getImage(const std::wstring &name) {
     SDL_Surface *img = images[name];
-    if (! img) {
+    if (!img) {
         img = loadImage(name);
         images[name] = img;
     }
     return img;
 }
 
-void TextParser::parseNextPage()
-{
-    if (tokenizer.isFinished())
+void TextParser::parseNextPage() {
+    if (tokenizer.isFinished()) {
         return;
-    
+    }
+
     int curPosY = 0;
     int lineWidth = 0;
     TextPage *page = new TextPage();
@@ -333,14 +309,18 @@ void TextParser::parseNextPage()
 
     while (true) {
         Token t = tokenizer.getNextToken();
-        if (Token::Eof == t.getType())
+        if (Token::Eof == t.getType()) {
             break;
+        }
         if (Token::Para == t.getType()) {
-            if (0 < line.length())
+            if (0 < line.length()) {
                 addLine(page, line, curPosY, lineWidth);
-            if (! page->isEmpty())
+            }
+            if (!page->isEmpty()) {
                 curPosY += 10;
-        } else if (Token::Word == t.getType()) {
+            }
+        }
+        else if (Token::Word == t.getType()) {
             const std::wstring &word = t.getContent();
             if (isImage(word)) {
                 addLine(page, line, curPosY, lineWidth);
@@ -349,17 +329,20 @@ void TextParser::parseNextPage()
                     const int x = offsetX + (pageWidth - image->w) / 2;
                     page->add(new Picture(x, offsetY + curPosY, image));
                     curPosY += image->h;
-                } else {
+                }
+                else {
                     tokenizer.unget(t);
                     break;
                 }
-            } else {
+            }
+            else {
                 const int width = font.getWidth(word);
                 if (lineWidth + width > scaleUp(pageWidth)) {
-                    if (! lineWidth) {
+                    if (!lineWidth) {
                         line = word;
                         addLine(page, line, curPosY, lineWidth);
-                    } else {
+                    }
+                    else {
                         addLine(page, line, curPosY, lineWidth);
                         if (curPosY >= pageHeight) {
                             tokenizer.unget(t);
@@ -368,7 +351,8 @@ void TextParser::parseNextPage()
                         line = word;
                         lineWidth = width;
                     }
-                } else {
+                }
+                else {
                     lineWidth += width;
                     if (!line.empty()) {
                         line += L' ';
@@ -378,26 +362,28 @@ void TextParser::parseNextPage()
                 }
             }
         }
-        if (curPosY >= pageHeight)
+        if (curPosY >= pageHeight) {
             break;
+        }
     }
     addLine(page, line, curPosY, lineWidth);
-    if (! page->isEmpty())
+    if (!page->isEmpty()) {
         pages.push_back(page);
-    else
+    }
+    else {
         delete page;
+    }
 }
 
-
-TextPage* TextParser::getPage(unsigned int no)
-{
-    if (pages.size() <= no)
+TextPage *TextParser::getPage(unsigned int no) {
+    if (pages.size() <= no) {
         return nullptr;
-    else
+    }
+    else {
         return pages[no];
+    }
 }
 
-size_t TextParser::getPageCount()
-{
+size_t TextParser::getPageCount() {
     return pages.size();
 }

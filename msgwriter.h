@@ -18,10 +18,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __MSGWRITER_H__
 #define __MSGWRITER_H__
-
 
 #include "buffer.h"
 
@@ -29,55 +27,47 @@
 #include <map>
 #include <string>
 
+class MsgCommand {
+  public:
+    virtual ~MsgCommand() = default;
 
-class MsgCommand 
-{
-    public:
-        virtual ~MsgCommand() = default;
-
-    public:
-        virtual std::wstring toString() = 0;
-        virtual int write(Buffer &buffer) = 0;
+  public:
+    virtual std::wstring toString() = 0;
+    virtual int write(Buffer &buffer) = 0;
 };
 
+class Message {
+  private:
+    typedef std::list<MsgCommand *> Commands;
+    Commands commands;
 
-class Message
-{
-    private:
-        typedef std::list<MsgCommand*> Commands;
-        Commands commands;
-
-    public:
-        explicit Message(const std::wstring &msg);
-        ~Message();
-        int save(Buffer &buffer);
+  public:
+    explicit Message(const std::wstring &msg);
+    ~Message();
+    int save(Buffer &buffer);
 };
 
+class MsgWriter {
+  private:
+    typedef struct {
+        int offset;
+        Message *message;
+    } MsgEntry;
+    typedef std::map<std::wstring, MsgEntry> MsgMap;
+    MsgMap messages;
 
-class MsgWriter
-{
-    private:
-        typedef struct {
-            int offset;
-            Message *message;
-        } MsgEntry;
-        typedef std::map<std::wstring, MsgEntry> MsgMap;
-        MsgMap messages;
-    
-    public:
-        MsgWriter();
-        ~MsgWriter();
+  public:
+    MsgWriter();
+    ~MsgWriter();
 
-    public:
-        void add(const std::wstring &key, const std::wstring &msg);
-        void save(Buffer &buffer);
+  public:
+    void add(const std::wstring &key, const std::wstring &msg);
+    void save(Buffer &buffer);
 
-    private:
-        int writeHeader(Buffer &buffer);
-        int writeMessages(Buffer &buffer, int offset);
-        int writeDirectory(Buffer &buffer);
+  private:
+    int writeHeader(Buffer &buffer);
+    int writeMessages(Buffer &buffer, int offset);
+    int writeDirectory(Buffer &buffer);
 };
-
 
 #endif
-

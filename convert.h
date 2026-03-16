@@ -18,10 +18,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __CONVERT_H__
 #define __CONVERT_H__
-
 
 #include "exceptions.h"
 #include "unicode.h"
@@ -29,19 +27,16 @@
 #include <sstream>
 #include <string>
 
-
 /// Convert value to string
 /// \param x value
-template <typename T>
-inline std::wstring toString(const T &x)
-{
+template <typename T> inline std::wstring toString(const T &x) {
     std::wostringstream o;
-    if (! (o << x))
+    if (!(o << x)) {
         throw Exception(L"Can't convert " + fromMbcs(typeid(x).name())
-                + L" to string");
+                        + L" to string");
+    }
     return o.str();
 }
-
 
 /// Convert string to lower case.
 std::wstring toLowerCase(const std::wstring &s);
@@ -60,6 +55,5 @@ int strToInt(const std::wstring &str);
 
 /// Conver string to double
 double strToDouble(const std::wstring &str);
-
 
 #endif

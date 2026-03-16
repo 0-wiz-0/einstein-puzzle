@@ -16,34 +16,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "convert.h"
 
-
-std::wstring toLowerCase(const std::wstring &s)
-{
+std::wstring toLowerCase(const std::wstring &s) {
     std::wstring res;
 
     const int len = s.length();
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len; i++) {
         res += (wchar_t)towlower(s[i]);
+    }
 
     return res;
 }
 
-std::wstring toUpperCase(const std::wstring &s)
-{
+std::wstring toUpperCase(const std::wstring &s) {
     std::wstring res;
 
     const int len = s.length();
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len; i++) {
         res += (wchar_t)towupper(s[i]);
+    }
 
     return res;
 }
 
-std::wstring numToStr(int num)
-{
+std::wstring numToStr(int num) {
     wchar_t buf[30];
 #ifdef WIN32
     swprintf(buf, L"%i", num);
@@ -54,8 +51,7 @@ std::wstring numToStr(int num)
     return std::wstring(buf);
 }
 
-std::wstring numToStr(unsigned int num)
-{
+std::wstring numToStr(unsigned int num) {
     wchar_t buf[30];
 #ifdef WIN32
     swprintf(buf, L"%u", num);
@@ -66,22 +62,22 @@ std::wstring numToStr(unsigned int num)
     return std::wstring(buf);
 }
 
-int strToInt(const std::wstring &str)
-{
+int strToInt(const std::wstring &str) {
     wchar_t *endptr;
 
     const int n = wcstol(str.c_str(), &endptr, 10);
-    if ((! str.c_str()[0]) || (endptr[0])) 
+    if ((!str.c_str()[0]) || (endptr[0])) {
         throw Exception(L"Invalid integer '" + str + L"'");
+    }
     return n;
 }
 
-double strToDouble(const std::wstring &str)
-{
+double strToDouble(const std::wstring &str) {
     wchar_t *endptr;
 
     const double n = wcstod(str.c_str(), &endptr);
-    if ((! str.c_str()[0]) || (endptr[0])) 
+    if ((!str.c_str()[0]) || (endptr[0])) {
         throw Exception(L"Invalid double '" + str + L"'");
+    }
     return n;
 }

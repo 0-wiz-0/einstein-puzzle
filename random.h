@@ -16,36 +16,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __RANDOM_H__
 #define __RANDOM_H__
 
-
-class Random
-{
-    private:
+class Random {
+  private:
 #define RAND_N 624
-        unsigned long mt[RAND_N]; /* the array for the state vector  */
-        int mti; /* mti==RAND_N+1 means mt[RAND_N] is not initialized */
-    
-    public:
-        Random();
-        explicit Random(unsigned long int seed);
-        Random(int keys[], int length);
-        ~Random();
+    unsigned long mt[RAND_N]; /* the array for the state vector  */
+    int mti; /* mti==RAND_N+1 means mt[RAND_N] is not initialized */
 
-    public:
-        /* generates a random number on [0,0xffffffff]-interval */
-        unsigned long int genInt32();
-        /* generates a random number on [0,1]-real-interval */
-        double genReal2(); 
-        /* generate integer random number on [0, range) int interval */
-        int genInt(int range);
+  public:
+    Random();
+    explicit Random(unsigned long int seed);
+    Random(int keys[], int length);
+    ~Random();
 
-    private:
-        void initLong(unsigned long int s);
+  public:
+    /* generates a random number on [0,0xffffffff]-interval */
+    unsigned long int genInt32();
+    /* generates a random number on [0,1]-real-interval */
+    double genReal2();
+    /* generate integer random number on [0, range) int interval */
+    int genInt(int range);
+
+  private:
+    void initLong(unsigned long int s);
 };
 
-
 #endif
-

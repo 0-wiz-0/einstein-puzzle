@@ -16,22 +16,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __EXCEPTIONS_H__
 #define __EXCEPTIONS_H__
 
-
-#include <string>
 #include <stdexcept>
+#include <string>
 
-
-class Exception: std::runtime_error
-{
-    public:
-        Exception(const char* msg) noexcept;
-        Exception(const std::wstring& msg) noexcept;
-        ~Exception() override = default;
-        const std::wstring getMessage() const noexcept;
+class Exception : std::runtime_error {
+  public:
+    Exception(const char *msg) noexcept;
+    Exception(const std::wstring &msg) noexcept;
+    ~Exception() override = default;
+    const std::wstring getMessage() const noexcept;
 };
 
 #endif

@@ -16,22 +16,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __VISITOR_H__
 #define __VISITOR_H__
 
-
 /// Abstract visitor
-template <typename T>
-class Visitor
-{
-    public:
-        virtual ~Visitor() { }
+template <typename T> class Visitor {
+  public:
+    virtual ~Visitor() {}
 
-        /// Called at every visit
-        virtual void onVisit(T &t) = 0;
+    /// Called at every visit
+    virtual void onVisit(T &t) = 0;
 };
 
-
 #endif
-

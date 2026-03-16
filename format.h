@@ -16,41 +16,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __FORMAT_H__
 #define __FORMAT_H__
-
 
 #include "buffer.h"
 
 #include <map>
 
-
-class Formatter
-{
-    public:
-        virtual ~Formatter() = default;
-        virtual void format(const std::wstring &fileName, Buffer &output) = 0;
+class Formatter {
+  public:
+    virtual ~Formatter() = default;
+    virtual void format(const std::wstring &fileName, Buffer &output) = 0;
 };
 
+class FormatRegistry {
+  private:
+    typedef std::map<std::wstring, Formatter *> FormattersMap;
+    FormattersMap formatters;
 
-class FormatRegistry
-{
-    private:
-        typedef std::map<std::wstring, Formatter*> FormattersMap;
-        FormattersMap formatters;
+  public:
+    FormatRegistry();
+    ~FormatRegistry();
 
-    public:
-        FormatRegistry();
-        ~FormatRegistry();
-
-    public:
-        Formatter* get(const std::wstring &name);
+  public:
+    Formatter *get(const std::wstring &name);
 };
-
 
 extern FormatRegistry formatRegistry;
 
-
 #endif
-

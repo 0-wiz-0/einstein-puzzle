@@ -16,21 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __MSG_FORMATTER_H__
 #define __MSG_FORMATTER_H__
 
-
 #include "format.h"
 
-
-class MsgFormatter: public Formatter
-{
-    public:
-        MsgFormatter();
-        void format(const std::wstring &fileName, Buffer &output) override;
+class MsgFormatter : public Formatter {
+  public:
+    MsgFormatter();
+    void format(const std::wstring &fileName, Buffer &output) override;
 };
 
-
 #endif
-

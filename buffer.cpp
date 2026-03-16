@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "buffer.h"
 
 #include "exceptions.h"
@@ -24,76 +23,67 @@
 
 #include <cstring>
 
-
 Buffer::Buffer(int sz, int alloc)
-    : size(sz), allocated(alloc), data(nullptr), currentPos(0)
-{
-    if (size > allocated)
+    : size(sz), allocated(alloc), data(nullptr), currentPos(0) {
+    if (size > allocated) {
         allocated = size;
-    if (allocated < 1024)
+    }
+    if (allocated < 1024) {
         allocated = 1024;
+    }
     data = malloc(allocated);
-    if (! data)
+    if (!data) {
         throw Exception(L"Error allocating memory for Buffer");
+    }
 }
 
-Buffer::~Buffer()
-{
+Buffer::~Buffer() {
     free(data);
 }
 
-void Buffer::setSize(size_t sz)
-{
+void Buffer::setSize(size_t sz) {
     if (sz > allocated) {
         int newAl = allocated + sz + 1024;
         void *d = realloc(data, newAl);
-        if (! d)
+        if (!d) {
             throw Exception(L"Error expanding buffer memory");
+        }
         data = d;
         allocated = newAl;
     }
-    
+
     size = sz;
 }
 
-size_t Buffer::getSize()
-{
+size_t Buffer::getSize() {
     return size;
 }
 
-size_t Buffer::getAllocated()
-{
+size_t Buffer::getAllocated() {
     return allocated;
 }
 
-void* Buffer::getData()
-{
+void *Buffer::getData() {
     return data;
 }
 
-
-void Buffer::gotoPos(int offset)
-{
+void Buffer::gotoPos(int offset) {
     currentPos = offset;
 }
 
-
-size_t Buffer::putData(const unsigned char *d, size_t length)
-{
-    if (size < currentPos + length)
+size_t Buffer::putData(const unsigned char *d, size_t length) {
+    if (size < currentPos + length) {
         setSize(currentPos + length);
-    memcpy((unsigned char*)data + currentPos, d, length);
+    }
+    memcpy((unsigned char *)data + currentPos, d, length);
     currentPos += length;
     return length;
 }
 
-
-size_t Buffer::putInteger(int v)
-{
+size_t Buffer::putInteger(int v) {
     unsigned char b[4];
 
-    for (unsigned char& i : b)
-    {
+    for (unsigned char &i : b) {
         const int ib = v & 0xFF;
         v = v >> 8;
         i = ib;
@@ -102,23 +92,18 @@ size_t Buffer::putInteger(int v)
     return putData(b, 4);
 }
 
-
-size_t Buffer::putUtf8(const std::wstring &string)
-{
+size_t Buffer::putUtf8(const std::wstring &string) {
     std::string s(toUtf8(string));
     putInteger(s.length());
-    putData((const unsigned char*)s.c_str(), s.length());
+    putData((const unsigned char *)s.c_str(), s.length());
     return 4 + s.length();
 }
 
-
-size_t Buffer::putByte(unsigned char value)
-{
-    if (size < (size_t)currentPos + 1)
+size_t Buffer::putByte(unsigned char value) {
+    if (size < (size_t)currentPos + 1) {
         setSize(currentPos + 1);
-    ((unsigned char*)data)[currentPos] = value;
+    }
+    ((unsigned char *)data)[currentPos] = value;
     currentPos++;
     return 1;
 }
-
-

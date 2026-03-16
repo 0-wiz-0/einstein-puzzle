@@ -16,36 +16,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __REGSTORAGE_H__
 #define __REGSTORAGE_H__
 
-
-#ifdef WIN32                    // Win32 only
+#ifdef WIN32 // Win32 only
 #include "storage.h"
 
 #include <windows.h>
 
+class RegistryStorage : public Storage {
+  private:
+    HKEY globalKey;
+    HKEY userKey;
 
-class RegistryStorage: public Storage
-{
-    private:
-        HKEY globalKey;
-        HKEY userKey;
+  public:
+    RegistryStorage();
+    virtual ~RegistryStorage();
 
-    public:
-        RegistryStorage();
-        virtual ~RegistryStorage();
-
-    public:
-        int get(const std::wstring &name, int dflt) override;
-        std::wstring get(const std::wstring &name, const std::wstring &dflt) override;
-        void set(const std::wstring &name, int value) override;
-        void set(const std::wstring &name, const std::wstring &value) override;
-        void flush() override { }
+  public:
+    int get(const std::wstring &name, int dflt) override;
+    std::wstring get(const std::wstring &name,
+                     const std::wstring &dflt) override;
+    void set(const std::wstring &name, int value) override;
+    void set(const std::wstring &name, const std::wstring &value) override;
+    void flush() override {}
 };
 
-
 #endif
 #endif
-

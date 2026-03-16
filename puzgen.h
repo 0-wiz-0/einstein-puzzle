@@ -16,10 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __PUZGEN_H__
 #define __PUZGEN_H__
-
 
 #include "iconset.h"
 
@@ -27,73 +25,63 @@
 #include <list>
 #include <string>
 
-
 #define PUZZLE_SIZE 6
-
 
 typedef short SolvedPuzzle[PUZZLE_SIZE][PUZZLE_SIZE];
 
+class Possibilities {
+  private:
+    short pos[PUZZLE_SIZE][PUZZLE_SIZE][PUZZLE_SIZE];
 
-class Possibilities
-{
-    private:
-        short pos[PUZZLE_SIZE][PUZZLE_SIZE][PUZZLE_SIZE];
-    
-    public:
-        Possibilities();
-        explicit Possibilities(std::istream &stream);
+  public:
+    Possibilities();
+    explicit Possibilities(std::istream &stream);
 
-    public:
-        void exclude(int col, int row, int element);
-        void set(int col, int row, int element);
-        bool isPossible(int col, int row, int element);
-        bool isDefined(int col, int row);
-        int getDefined(int col, int row);
-        bool isSolved();
-        void print();
-        bool isValid(SolvedPuzzle &puzzle);
-        void save(std::ostream &stream);
-        void reset();
-        void checkSingles(int row);
+  public:
+    void exclude(int col, int row, int element);
+    void set(int col, int row, int element);
+    bool isPossible(int col, int row, int element);
+    bool isDefined(int col, int row);
+    int getDefined(int col, int row);
+    bool isSolved();
+    void print();
+    bool isValid(SolvedPuzzle &puzzle);
+    void save(std::ostream &stream);
+    void reset();
+    void checkSingles(int row);
 };
 
+class Rule {
+  public:
+    enum ShowOptions {
+        SHOW_VERT,
+        SHOW_HORIZ,
+        SHOW_NOTHING
+    };
 
-class Rule
-{
-    public:
-        enum ShowOptions {
-            SHOW_VERT,
-            SHOW_HORIZ,
-            SHOW_NOTHING
-        };
-    
-    public:
-        virtual ~Rule() = default;
+  public:
+    virtual ~Rule() = default;
 
-    public:
-        virtual std::wstring getAsText() = 0;
-        virtual bool apply(Possibilities &pos) = 0;
-        virtual bool applyOnStart() { return false; }
-        virtual ShowOptions getShowOpts() { return SHOW_NOTHING; }
-        virtual void draw(int x, int y, IconSet &iconSet, bool highlight) = 0;
-        virtual void save(std::ostream &stream) = 0;
+  public:
+    virtual std::wstring getAsText() = 0;
+    virtual bool apply(Possibilities &pos) = 0;
+    virtual bool applyOnStart() { return false; }
+    virtual ShowOptions getShowOpts() { return SHOW_NOTHING; }
+    virtual void draw(int x, int y, IconSet &iconSet, bool highlight) = 0;
+    virtual void save(std::ostream &stream) = 0;
 };
 
-
-typedef std::list<Rule*> Rules;
-
+typedef std::list<Rule *> Rules;
 
 void genPuzzle(SolvedPuzzle &puzzle, Rules &rules);
 void openInitial(Possibilities &possib, Rules &rules);
-Rule* genRule(SolvedPuzzle &puzzle);
+Rule *genRule(SolvedPuzzle &puzzle);
 void getHintsQty(Rules &rules, int &vert, int &horiz);
-Rule* getRule(Rules &rules, int no);
+Rule *getRule(Rules &rules, int no);
 
 void savePuzzle(SolvedPuzzle &puzzle, std::ostream &stream);
 void loadPuzzle(SolvedPuzzle &puzzle, std::istream &stream);
 void saveRules(Rules &rules, std::ostream &stream);
 void loadRules(Rules &rules, std::istream &stream);
 
-
 #endif
-

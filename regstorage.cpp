@@ -16,135 +16,133 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#ifdef WIN32                    // Win32 only
+#ifdef WIN32 // Win32 only
 #include "regstorage.h"
 #include "unicode.h"
 
-
-RegistryStorage::RegistryStorage()
-{
-    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
-                "SOFTWARE\\Flowix Games\\Einstein\\2.0",
-                0, KEY_READ, &globalKey))
+RegistryStorage::RegistryStorage() {
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+                     "SOFTWARE\\Flowix Games\\Einstein\\2.0", 0, KEY_READ,
+                     &globalKey)) {
         globalKey = nullptr;
-    if (RegOpenKeyEx(HKEY_CURRENT_USER, 
-                "SOFTWARE\\Flowix Games\\Einstein\\2.0",
-                0, KEY_READ | KEY_WRITE, &userKey))
-    {
-        if (RegCreateKeyEx(HKEY_CURRENT_USER, 
-                    "SOFTWARE\\Flowix Games\\Einstein\\2.0", 0, nullptr,
-                    REG_OPTION_NON_VOLATILE, KEY_READ | KEY_WRITE,
-                    nullptr, &userKey, nullptr))
+    }
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, "SOFTWARE\\Flowix Games\\Einstein\\2.0",
+                     0, KEY_READ | KEY_WRITE, &userKey)) {
+        if (RegCreateKeyEx(HKEY_CURRENT_USER,
+                           "SOFTWARE\\Flowix Games\\Einstein\\2.0", 0, nullptr,
+                           REG_OPTION_NON_VOLATILE, KEY_READ | KEY_WRITE,
+                           nullptr, &userKey, nullptr)) {
             userKey = nullptr;
+        }
     }
 }
 
-RegistryStorage::~RegistryStorage()
-{
-    if (globalKey)
+RegistryStorage::~RegistryStorage() {
+    if (globalKey) {
         RegCloseKey(globalKey);
-    if (userKey)
+    }
+    if (userKey) {
         RegCloseKey(userKey);
+    }
 }
 
-int RegistryStorage::get(const std::wstring &name, int dflt)
-{
+int RegistryStorage::get(const std::wstring &name, int dflt) {
     std::string uname(toUtf8(name));
-    
+
     if (globalKey) {
         DWORD data;
         DWORD size = sizeof(data);
         DWORD type;
-        if (! RegQueryValueEx(globalKey, uname.c_str(), nullptr, &type,
-                    (BYTE*)&data, &size))
-            if (type == REG_DWORD)
+        if (!RegQueryValueEx(globalKey, uname.c_str(), nullptr, &type,
+                             (BYTE *)&data, &size)) {
+            if (type == REG_DWORD) {
                 return data;
+            }
+        }
     }
-    
+
     if (userKey) {
         DWORD data;
         DWORD size = sizeof(data);
         DWORD type;
-        if (! RegQueryValueEx(userKey, uname.c_str(), nullptr, &type,
-                    (BYTE*)&data, &size))
-            if (type == REG_DWORD)
+        if (!RegQueryValueEx(userKey, uname.c_str(), nullptr, &type,
+                             (BYTE *)&data, &size)) {
+            if (type == REG_DWORD) {
                 return data;
+            }
+        }
     }
-    
+
     return dflt;
 }
 
-std::wstring RegistryStorage::get(const std::wstring &name, const std::wstring &dflt)
-{
+std::wstring RegistryStorage::get(const std::wstring &name,
+                                  const std::wstring &dflt) {
     std::string uname(toUtf8(name));
-    
+
     if (globalKey) {
         DWORD size = 0;
         DWORD type;
-        if (! RegQueryValueEx(globalKey, uname.c_str(), nullptr, &type,
-                    nullptr, &size))
-        {
+        if (!RegQueryValueEx(globalKey, uname.c_str(), nullptr, &type, nullptr,
+                             &size)) {
             if ((type == REG_SZ) && (size > 0)) {
                 char *data = new char[size + 1];
-                if (! RegQueryValueEx(globalKey, uname.c_str(), nullptr, &type,
-                            (BYTE*)data, &size)) 
-                {
+                if (!RegQueryValueEx(globalKey, uname.c_str(), nullptr, &type,
+                                     (BYTE *)data, &size)) {
                     std::wstring s(fromUtf8(data));
                     delete[] data;
                     return s;
                 }
                 delete[] data;
-            } else
+            }
+            else {
                 return L"";
+            }
         }
     }
-    
+
     if (userKey) {
         DWORD size = 0;
         DWORD type;
-        if (! RegQueryValueEx(userKey, uname.c_str(), nullptr, &type,
-                    nullptr, &size))
-        {
+        if (!RegQueryValueEx(userKey, uname.c_str(), nullptr, &type, nullptr,
+                             &size)) {
             if ((type == REG_SZ) && (size > 0)) {
                 char *data = new char[size];
-                if (! RegQueryValueEx(userKey, uname.c_str(), nullptr, &type,
-                            (BYTE*)data, &size)) 
-                {
+                if (!RegQueryValueEx(userKey, uname.c_str(), nullptr, &type,
+                                     (BYTE *)data, &size)) {
                     std::wstring s(fromUtf8(data));
                     delete[] data;
                     return s;
                 }
                 delete[] data;
-            } else
+            }
+            else {
                 return L"";
+            }
         }
     }
-    
+
     return dflt;
 }
 
-void RegistryStorage::set(const std::wstring &name, int value)
-{
+void RegistryStorage::set(const std::wstring &name, int value) {
     std::string uname(toUtf8(name));
-    
+
     if (userKey) {
         DWORD data = value;
-        RegSetValueEx(userKey, uname.c_str(), 0, REG_DWORD, 
-                (BYTE*)&data, sizeof(data));
+        RegSetValueEx(userKey, uname.c_str(), 0, REG_DWORD, (BYTE *)&data,
+                      sizeof(data));
     }
 }
 
-void RegistryStorage::set(const std::wstring &name, const std::wstring &value)
-{
+void RegistryStorage::set(const std::wstring &name, const std::wstring &value) {
     std::string uname(toUtf8(name));
     std::string uval(toUtf8(value));
 
-    if (userKey)
-        RegSetValueEx(userKey, uname.c_str(), 0, REG_SZ, 
-                (BYTE*)uval.c_str(), (uval.length() + 1) * sizeof(char));
+    if (userKey) {
+        RegSetValueEx(userKey, uname.c_str(), 0, REG_SZ, (BYTE *)uval.c_str(),
+                      (uval.length() + 1) * sizeof(char));
+    }
 }
 
-
 #endif
-

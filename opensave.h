@@ -16,19 +16,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __OPENSAVE_H__
 #define __OPENSAVE_H__
-
 
 #include "game.h"
 #include "widgets.h"
 
-
 bool saveGame(Area *parentArea, Game *game);
-Game* loadGame(Area *parentArea);
-
-
+Game *loadGame(Area *parentArea);
 
 #endif
-

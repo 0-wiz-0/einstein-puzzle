@@ -16,39 +16,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __SOUND_H__
 #define __SOUND_H__
 
-
+#include <SDL_mixer.h>
 #include <map>
 #include <string>
-#include <SDL_mixer.h>
 
+class Sound {
+  private:
+    bool disabled;
 
-class Sound
-{
-    private:
-        bool disabled;
-        
-        typedef std::map<std::wstring, Mix_Chunk*> ChunkMap;
-        ChunkMap chunkCache;
+    typedef std::map<std::wstring, Mix_Chunk *> ChunkMap;
+    ChunkMap chunkCache;
 
-        bool enableFx;
-        float volume;
-    
-    public:
-        Sound();
-        ~Sound();
+    bool enableFx;
+    float volume;
 
-    public:
-        void play(const std::wstring &name);
-        void setVolume(float volume);
+  public:
+    Sound();
+    ~Sound();
+
+  public:
+    void play(const std::wstring &name);
+    void setVolume(float volume);
 };
-
 
 extern Sound *sound;
 
-
 #endif
-

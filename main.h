@@ -16,14 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-
 #include "random.h"
 #include "screen.h"
-
 
 extern Screen screen;
 extern Random rndGen;
@@ -31,4 +28,3 @@ extern Random rndGen;
 void menu();
 
 #endif
-
