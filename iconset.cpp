@@ -41,7 +41,7 @@ IconSet::IconSet() {
     sideHintIcon[0] = loadImage(L"hint-side.bmp");
     sideHintIcon[1] = adjustBrightness(sideHintIcon[0], 1.5, false);
     betweenArrow[0] = loadImage(L"betwarr.bmp", true);
-    betweenArrow[1] = adjustBrightness(betweenArrow[0], 1.5, false);
+    betweenArrow[1] = adjustBrightness(betweenArrow[0], 1.5, true);
 }
 
 IconSet::~IconSet() {
