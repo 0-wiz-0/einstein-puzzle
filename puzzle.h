@@ -40,8 +40,8 @@ class Puzzle : public Widget {
 
   public:
     void draw() override;
-    void drawRow(int row, bool addToUpdate = true);
-    void drawCell(int col, int row, bool addToUpdate = true);
+    void drawRow(int row);
+    void drawCell(int col, int row);
     Possibilities *getPossibilities() { return possib; }
     bool onMouseButtonDown(int button, int x, int y) override;
     bool isValid() const { return valid; }

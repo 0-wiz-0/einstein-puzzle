@@ -81,7 +81,6 @@ void TileWidget::draw() {
 
     if (s) {
         screen.draw(getLeft(), getTop(), s);
-        screen.addRegionToUpdate(left, top, width, height);
     }
 }
 
@@ -223,8 +222,6 @@ void TextHighlightWidget::draw() {
     tH = scaleDown(tH);
     font->draw(left + ((width - tW) / 2), top + ((height - tH) / 2), r, g, b,
                true, getText());
-
-    screen.addRegionToUpdate(left, top, width, height);
 }
 
 //////////////////////////////////////////////////////////////////
@@ -615,7 +612,6 @@ void Label::draw() {
     }
 
     font->draw(x, y, red, green, blue, shadow, text);
-    screen.addRegionToUpdate(x, y, w, h);
 }
 
 //////////////////////////////////////////////////////////////////
@@ -848,7 +844,6 @@ void Slider::draw() {
         createBackground();
     }
     screen.draw(getLeft(), getTop(), background);
-    screen.addRegionToUpdate(left, top, width, height);
     int posX = scaleUp(valueToX(value));
     SDL_Surface *s = highlight ? activeSlider : slider;
     screen.draw(getLeft() + posX, getTop(), s);

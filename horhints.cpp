@@ -87,12 +87,12 @@ void HorHints::reset(Rules &r) {
 void HorHints::draw() {
     for (int i = 0; i < HINTS_ROWS; i++) {
         for (int j = 0; j < HINTS_COLS; j++) {
-            drawCell(j, i, true);
+            drawCell(j, i);
         }
     }
 }
 
-void HorHints::drawCell(int col, int row, bool addToUpdate) {
+void HorHints::drawCell(int col, int row) {
     const int x = TILE_X + col * (TILE_WIDTH * 3 + TILE_GAP_X);
     const int y = TILE_Y + row * (TILE_HEIGHT + TILE_GAP_Y);
 
@@ -117,10 +117,6 @@ void HorHints::drawCell(int col, int row, bool addToUpdate) {
         }
         screen.drawScaled(x, y, s);
         SDL_FreeSurface(s);
-    }
-
-    if (addToUpdate) {
-        screen.addRegionToUpdate(x, y, TILE_WIDTH * 3, TILE_HEIGHT);
     }
 }
 

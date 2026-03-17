@@ -37,9 +37,8 @@ int DESKTOP_HEIGHT = 0;
 Screen::Screen()
     : screen(nullptr), scale(1.0), fullScreen(false), screenSize(0),
       window(nullptr), renderer(nullptr), texture(nullptr),
-      mouseCursor(nullptr), mouseVisible(false), regionsList(nullptr),
-      maxRegionsList(0), saveX(0), saveY(0), niceCursor(false), cursor(nullptr),
-      emptyCursor(nullptr) {
+      mouseCursor(nullptr), mouseVisible(false), saveX(0), saveY(0),
+      niceCursor(false), cursor(nullptr), emptyCursor(nullptr) {
 }
 
 Screen::~Screen() {
@@ -48,9 +47,6 @@ Screen::~Screen() {
     if (mouseCursor) {
         SDL_FreeCursor(mouseCursor);
         mouseCursor = nullptr;
-    }
-    if (regionsList) {
-        free(regionsList);
     }
 }
 
@@ -183,10 +179,6 @@ void Screen::flush() {
     }
 }
 
-void Screen::addRegionToUpdate(int chkX, int chkY, int chkW, int chkH) {
-    // TODO: remove
-}
-
 void Screen::draw(int x, int y, SDL_Surface *tile) {
     blitDraw(x, y, tile, screen);
 }
@@ -240,7 +232,6 @@ SDL_Surface *Screen::createSubimage(int x, int y, int width, int height) {
 
 void Screen::drawWallpaper(const std::wstring &name) {
     drawTiled(name, screen);
-    addRegionToUpdate(0, 0, getWidth(), getHeight());
 }
 
 SDL_PixelFormat *Screen::getFormat() {

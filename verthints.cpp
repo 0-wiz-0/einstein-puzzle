@@ -86,11 +86,11 @@ void VertHints::reset(Rules &r) {
 
 void VertHints::draw() {
     for (int i = 0; i < TILE_NUM; i++) {
-        drawCell(i, true);
+        drawCell(i);
     }
 }
 
-void VertHints::drawCell(int col, bool addToUpdate) {
+void VertHints::drawCell(int col) {
     int x = TILE_X + col * (TILE_WIDTH + TILE_GAP);
     int y = TILE_Y;
 
@@ -114,10 +114,6 @@ void VertHints::drawCell(int col, bool addToUpdate) {
         blitDraw(0, t->h, t, s);
         screen.drawScaled(x, y, s);
         SDL_FreeSurface(s);
-    }
-
-    if (addToUpdate) {
-        screen.addRegionToUpdate(x, y, TILE_WIDTH, TILE_HEIGHT * 2);
     }
 }
 

@@ -147,7 +147,6 @@ void Watch::draw() {
     SDL_FillRect(screen.getSurface(), &rect,
                  SDL_MapRGB(screen.getSurface()->format, 0, 0, 255));
     font->draw(x, y, 255, 255, 255, true, s);
-    screen.addRegionToUpdate(x - 2, y - 2, w + 4, h + 4);
 
     lastUpdate = time;
 }
@@ -464,7 +463,6 @@ void Game::pleaseWait() {
     Label label(&font, 280, 275, 240, 50, Label::ALIGN_CENTER,
                 Label::ALIGN_MIDDLE, 255, 255, 0, msg(L"loading"));
     label.draw();
-    screen.addRegionToUpdate(0, 0, screen.getWidth(), screen.getHeight());
     screen.flush();
 }
 

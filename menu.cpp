@@ -189,7 +189,6 @@ void menu() {
     area.add(new KeyAccel(SDLK_ESCAPE, &exitMenuCmd));
 
     area.draw();
-    screen.addRegionToUpdate(0, 0, screen.getWidth(), screen.getHeight());
     screen.flush();
 
     area.run();

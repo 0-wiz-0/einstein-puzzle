@@ -59,8 +59,6 @@ class Screen {
     int screenSize;
     SDL_Cursor *mouseCursor;
     bool mouseVisible;
-    SDL_Rect *regionsList;
-    int maxRegionsList;
     int saveX, saveY;
     bool niceCursor;
     SDL_Cursor *cursor, *emptyCursor;
@@ -79,7 +77,6 @@ class Screen {
     void showMouse();
     void updateMouse();
     void flush();
-    void addRegionToUpdate(int x, int y, int w, int h);
     SDL_Surface *getSurface() { return screen; }
     SDL_Window *getWindow() { return window; };
     void draw(int x, int y, SDL_Surface *surface);

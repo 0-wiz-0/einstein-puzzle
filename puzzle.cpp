@@ -50,12 +50,12 @@ void Puzzle::reset() {
 void Puzzle::draw() {
     for (int i = 0; i < PUZZLE_SIZE; i++) {
         for (int j = 0; j < PUZZLE_SIZE; j++) {
-            drawCell(i, j, true);
+            drawCell(i, j);
         }
     }
 }
 
-void Puzzle::drawCell(int col, int row, bool addToUpdate) {
+void Puzzle::drawCell(int col, int row) {
     const int posX = FIELD_OFFSET_X + col * (FIELD_TILE_WIDTH + FIELD_GAP_X);
     const int posY = FIELD_OFFSET_Y + row * (FIELD_TILE_HEIGHT + FIELD_GAP_Y);
 
@@ -101,15 +101,11 @@ void Puzzle::drawCell(int col, int row, bool addToUpdate) {
         screen.draw(scaleUp(posX), scaleUp(posY), newTile);
         SDL_FreeSurface(newTile);
     }
-    if (addToUpdate) {
-        screen.addRegionToUpdate(posX, posY, FIELD_TILE_WIDTH,
-                                 FIELD_TILE_HEIGHT);
-    }
 }
 
-void Puzzle::drawRow(int row, bool addToUpdate) {
+void Puzzle::drawRow(int row) {
     for (int i = 0; i < PUZZLE_SIZE; i++) {
-        drawCell(i, row, addToUpdate);
+        drawCell(i, row);
     }
 }
 

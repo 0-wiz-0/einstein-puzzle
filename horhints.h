@@ -41,7 +41,7 @@ class HorHints : public Widget {
 
   public:
     void draw() override;
-    void drawCell(int col, int row, bool addToUpdate = true);
+    void drawCell(int col, int row);
     bool onMouseButtonDown(int button, int x, int y) override;
     void toggleExcluded();
     int getRuleNo(int x, int y);
