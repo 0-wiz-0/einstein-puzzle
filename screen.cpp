@@ -80,30 +80,49 @@ void Screen::setMode(bool isFullScreen) {
 void Screen::applyMode() {
     int flags
         = (fullScreen) ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_RESIZABLE;
+    if (texture) {
+        SDL_DestroyTexture(texture);
+        texture = nullptr;
+    }
     if (renderer) {
         SDL_DestroyRenderer(renderer);
+        renderer = nullptr;
+    }
+    if (screen) {
+        SDL_FreeSurface(screen);
+        screen = nullptr;
     }
     if (window) {
-        SDL_DestroyWindow(window);
+        SDL_SetWindowSize(window, UNSCALED_WIDTH, UNSCALED_HEIGHT);
+	SDL_SetWindowFullscreen(window, flags);
+    } else {
+        window = SDL_CreateWindow("Einstein", SDL_WINDOWPOS_UNDEFINED,
+                                  SDL_WINDOWPOS_UNDEFINED, UNSCALED_WIDTH,
+                                  UNSCALED_HEIGHT, flags);
     }
-    window = SDL_CreateWindow("Einstein", SDL_WINDOWPOS_UNDEFINED,
-                              SDL_WINDOWPOS_UNDEFINED, UNSCALED_WIDTH,
-                              UNSCALED_HEIGHT, flags);
-    if (window) {
-        renderer = SDL_CreateRenderer(
-            window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    }
-    if (window != NULL && renderer != NULL) {
-        screen = SDL_CreateRGBSurface(0, UNSCALED_WIDTH, UNSCALED_HEIGHT, 32,
-                                      0x00ff0000, 0x0000ff00, 0x000000ff,
-                                      0xff000000);
-        texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
-                                    SDL_TEXTUREACCESS_STREAMING, UNSCALED_WIDTH,
-                                    UNSCALED_HEIGHT);
+    if (!window) {
+        throw Exception(L"Couldn't create window: " + fromMbcs(SDL_GetError()));
     }
 
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer) {
+        throw Exception(L"Couldn't create renderer: "
+                        + fromMbcs(SDL_GetError()));
+    }
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+                                SDL_TEXTUREACCESS_STREAMING, UNSCALED_WIDTH,
+                                UNSCALED_HEIGHT);
+    if (!texture) {
+        throw Exception(L"Couldn't create texture: "
+                        + fromMbcs(SDL_GetError()));
+    }
+
+    screen = SDL_CreateRGBSurface(0, UNSCALED_WIDTH, UNSCALED_HEIGHT, 32,
+				  0x00ff0000, 0x0000ff00, 0x000000ff,
+				  0xff000000);
+
     if (!screen) {
-        throw Exception(L"Couldn't set video mode: "
+        throw Exception(L"Couldn't create screen: "
                         + fromMbcs((SDL_GetError())));
     }
 }
