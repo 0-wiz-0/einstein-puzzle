@@ -35,10 +35,10 @@ int DESKTOP_WIDTH = 0;
 int DESKTOP_HEIGHT = 0;
 
 Screen::Screen()
-    : screen(nullptr), scale(1.0), fullScreen(false), screenSize(0),
-      window(nullptr), renderer(nullptr), texture(nullptr),
-      mouseCursor(nullptr), mouseVisible(false), saveX(0), saveY(0),
-      niceCursor(false), cursor(nullptr) {
+    : screen(nullptr), window(nullptr), renderer(nullptr), texture(nullptr),
+      scale(1.0), fullScreen(false), screenSize(0), mouseCursor(nullptr),
+      mouseVisible(false), saveX(0), saveY(0), niceCursor(false),
+      cursor(nullptr) {
 }
 
 Screen::~Screen() {
