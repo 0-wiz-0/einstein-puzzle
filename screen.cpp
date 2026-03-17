@@ -74,8 +74,9 @@ void Screen::applyMode() {
     }
     if (window) {
         SDL_SetWindowSize(window, UNSCALED_WIDTH, UNSCALED_HEIGHT);
-	SDL_SetWindowFullscreen(window, flags);
-    } else {
+        SDL_SetWindowFullscreen(window, flags);
+    }
+    else {
         window = SDL_CreateWindow("Einstein", SDL_WINDOWPOS_UNDEFINED,
                                   SDL_WINDOWPOS_UNDEFINED, UNSCALED_WIDTH,
                                   UNSCALED_HEIGHT, flags);
@@ -84,7 +85,8 @@ void Screen::applyMode() {
         throw Exception(L"Couldn't create window: " + fromMbcs(SDL_GetError()));
     }
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(
+        window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer) {
         throw Exception(L"Couldn't create renderer: "
                         + fromMbcs(SDL_GetError()));
@@ -97,9 +99,9 @@ void Screen::applyMode() {
                         + fromMbcs(SDL_GetError()));
     }
 
-    screen = SDL_CreateRGBSurface(0, UNSCALED_WIDTH, UNSCALED_HEIGHT, 32,
-				  0x00ff0000, 0x0000ff00, 0x000000ff,
-				  0xff000000);
+    screen
+        = SDL_CreateRGBSurface(0, UNSCALED_WIDTH, UNSCALED_HEIGHT, 32,
+                               0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
 
     if (!screen) {
         throw Exception(L"Couldn't create screen: "

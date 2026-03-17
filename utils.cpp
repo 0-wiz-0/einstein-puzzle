@@ -133,9 +133,10 @@ SDL_Surface *loadImage(const std::wstring &name, bool transparent) {
     if (!s) {
         throw Exception(L"Error loading " + name);
     }
-    SDL_Surface *screenS = SDL_ConvertSurfaceFormat(s, SDL_PIXELFORMAT_ARGB8888, 0);
+    SDL_Surface *screenS
+        = SDL_ConvertSurfaceFormat(s, SDL_PIXELFORMAT_ARGB8888, 0);
     SDL_FreeSurface(s);
-    if (! screenS) {
+    if (!screenS) {
         throw Exception(L"Error translating to screen format " + name);
     }
     if (transparent) {
@@ -276,9 +277,11 @@ void adjustBrightness(SDL_Surface *image, int x, int y, double k) {
 SDL_Surface *adjustBrightness(SDL_Surface *image, double k, bool transparent) {
     setGamma(k);
 
-    SDL_Surface *s = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_ARGB8888, 0);
-    if (! s)
+    SDL_Surface *s
+        = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_ARGB8888, 0);
+    if (!s) {
         throw Exception(L"Error converting image to display format");
+    }
 
     SDL_LockSurface(s);
 
