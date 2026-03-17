@@ -61,7 +61,7 @@ class Screen {
     bool mouseVisible;
     int saveX, saveY;
     bool niceCursor;
-    SDL_Cursor *cursor, *emptyCursor;
+    SDL_Cursor *cursor;
     void applyMode();
 
   public:

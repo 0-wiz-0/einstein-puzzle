@@ -38,7 +38,7 @@ Screen::Screen()
     : screen(nullptr), scale(1.0), fullScreen(false), screenSize(0),
       window(nullptr), renderer(nullptr), texture(nullptr),
       mouseCursor(nullptr), mouseVisible(false), saveX(0), saveY(0),
-      niceCursor(false), cursor(nullptr), emptyCursor(nullptr) {
+      niceCursor(false), cursor(nullptr) {
 }
 
 Screen::~Screen() {
@@ -205,15 +205,12 @@ void Screen::setCursor(bool nice) {
 
 void Screen::initCursors() {
     cursor = SDL_GetCursor();
-    Uint8 t = 0;
-    emptyCursor = SDL_CreateCursor(&t, &t, 8, 1, 0, 0);
 }
 
 void Screen::doneCursors() {
     if (niceCursor) {
         SDL_SetCursor(cursor);
     }
-    SDL_FreeCursor(emptyCursor);
 }
 
 SDL_Surface *Screen::createSubimage(int x, int y, int width, int height) {
