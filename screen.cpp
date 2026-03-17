@@ -51,6 +51,7 @@ Screen::~Screen() {
     SDL_ShowCursor(SDL_ENABLE);
     if (mouseCursor) {
         SDL_FreeCursor(mouseCursor);
+        mouseCursor = nullptr;
     }
     if (regionsList) {
         free(regionsList);
@@ -136,15 +137,18 @@ int Screen::getHeight() const {
 }
 
 void Screen::setMouseImage(SDL_Surface *image) {
+    SDL_Surface *mouseImage
+        = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_ARGB8888, 0);
+
     if (mouseCursor) {
         SDL_FreeCursor(mouseCursor);
-        mouseCursor = NULL;
+        mouseCursor = nullptr;
     }
     if (!image) {
         return;
     }
 
-    mouseCursor = SDL_CreateColorCursor(image, 0, 0);
+    mouseCursor = SDL_CreateColorCursor(mouseImage, 0, 0);
 }
 
 void Screen::hideMouse() {
