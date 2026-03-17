@@ -92,7 +92,6 @@ class Screen {
     SDL_PixelFormat *getFormat();
     void setClipRect(SDL_Rect *rect);
     void setSize(int screenSize);
-    std::vector<std::wstring> getModeList();
     float getScale();
     void getMouse(int *x, int *y);
     void convertMouse(int *x, int *y);

@@ -42,20 +42,18 @@ class OptionsChangedCommand : public Command {
   private:
     bool &fullscreen;
     bool &niceCursor;
-    int &screenSize;
     float &volume;
     Area *area;
 
   public:
-    OptionsChangedCommand(Area *a, bool &fs, bool &ns, int &ss, float &v)
-        : fullscreen(fs), niceCursor(ns), screenSize(ss), volume(v) {
+    OptionsChangedCommand(Area *a, bool &fs, bool &ns, float &v)
+        : fullscreen(fs), niceCursor(ns), volume(v) {
         area = a;
     }
 
     void doAction() override {
         const bool oldFullscreen = (getStorage()->get(L"fullscreen", 1) != 0);
         const bool oldCursor = (getStorage()->get(L"niceCursor", 1) != 0);
-        const int oldSize = ((float)getStorage()->get(L"screenSize", 1));
         const float oldVolume
             = (float)getStorage()->get(L"volume", 20) / 100.0f;
         if (fullscreen != oldFullscreen) {
@@ -68,10 +66,6 @@ class OptionsChangedCommand : public Command {
             screen.setCursor(niceCursor);
         }
 #endif
-        if (screenSize != oldSize) {
-            getStorage()->set(L"screenSize", (int)screenSize);
-            screen.setSize(screenSize);
-        }
         if (volume != oldVolume) {
             getStorage()->set(L"volume", (int)(volume * 100.0f));
             sound->setVolume(volume);
@@ -124,7 +118,6 @@ void showOptionsWindow(Area *parentArea) {
 
     bool fullscreen = (getStorage()->get(L"fullscreen", 1) != 0);
     bool niceCursor = (getStorage()->get(L"niceCursor", 1) != 0);
-    int screenSize = ((int)getStorage()->get(L"screenSize", 1));
     float volume = ((float)getStorage()->get(L"volume", 20)) / 100.0f;
 
     Area area;
@@ -137,18 +130,13 @@ void showOptionsWindow(Area *parentArea) {
 #ifndef __APPLE__
     OPTION(280, L"niceCursor", niceCursor);
 #endif
-    area.add(new Label(&font, 265, 305, 300, 18, Label::ALIGN_LEFT,
-                       Label::ALIGN_MIDDLE, 255, 255, 255, msg(L"screenSize")));
-    area.add(new CycleButton(360, 305, 160, 18, &font, screenSize,
-                             screen.getModeList()));
 
     area.add(new Label(&font, 265, 330, 300, 20, Label::ALIGN_LEFT,
                        Label::ALIGN_MIDDLE, 255, 255, 255, msg(L"volume")));
     area.add(new VolumeSlider(360, 332, 160, 16, volume));
 
     CancelCommand exitCmd(area);
-    OptionsChangedCommand okCmd(&area, fullscreen, niceCursor, screenSize,
-                                volume);
+    OptionsChangedCommand okCmd(&area, fullscreen, niceCursor, volume);
     area.add(new OptionsButton(315, 390, 85, 25, &font, 255, 255, 0,
                                L"blue.bmp", msg(L"ok"), &okCmd));
     area.add(new OptionsButton(405, 390, 85, 25, &font, 255, 255, 0,

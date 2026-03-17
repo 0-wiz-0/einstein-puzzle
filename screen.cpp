@@ -30,10 +30,6 @@
 
 #define UNSCALED_WIDTH 800
 #define UNSCALED_HEIGHT 600
-#define NUM_MODES 5
-
-int modes[NUM_MODES][2]
-    = {{800, 600}, {1024, 768}, {1152, 864}, {1280, 960}, {1400, 1050}};
 
 int DESKTOP_WIDTH = 0;
 int DESKTOP_HEIGHT = 0;
@@ -56,19 +52,6 @@ Screen::~Screen() {
     if (regionsList) {
         free(regionsList);
     }
-}
-
-std::vector<std::wstring> Screen::getModeList() {
-    std::vector<std::wstring> v;
-    int n = NUM_MODES;
-    v.reserve(n);
-
-    for (int i = 0; i < n; i++) {
-        std::wstringstream streamVal;
-        streamVal << modes[i][0] << "x" << modes[i][1];
-        v.push_back(streamVal.str());
-    }
-    return v;
 }
 
 void Screen::setMode(bool isFullScreen) {
