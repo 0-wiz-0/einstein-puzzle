@@ -464,8 +464,6 @@ void Area::updateMouse() {
     int x, y;
     screen.getMouse(&x, &y);
 
-    //    screen.getMouse(&x, &y);
-
     for (auto &widget : widgets) {
         if (widget->onMouseMove(x, y)) {
             return;
