@@ -220,7 +220,7 @@ wchar_t g_utf8_get_char(const char *p) {
  *               @error set.
  **/
 wchar_t *g_utf8_to_ucs4(const char *str, long len, long *items_read,
-                        long *items_written, wchar_t **error) {
+                        long *items_written, const wchar_t **error) {
     wchar_t *result = nullptr;
     int n_chars, i;
     const char *in;
@@ -344,7 +344,7 @@ int g_unichar_to_utf8(wchar_t c, char *outbuf) {
  *               @error set.
  **/
 char *g_ucs4_to_utf8(const wchar_t *str, long len, long *items_read,
-                     long *items_written, wchar_t **error) {
+                     long *items_written, const wchar_t **error) {
     int result_length;
     char *result = nullptr;
     char *p;
@@ -393,7 +393,7 @@ err_out:
 
 std::string toUtf8(const std::wstring &str) {
     long readed, writed;
-    wchar_t *errMsg = nullptr;
+    const wchar_t *errMsg = nullptr;
 
     char *res
         = g_ucs4_to_utf8(str.c_str(), str.length(), &readed, &writed, &errMsg);
@@ -414,7 +414,7 @@ std::string toUtf8(const std::wstring &str) {
 
 std::wstring fromUtf8(const std::string &str) {
     long readed, writed;
-    wchar_t *errMsg = nullptr;
+    const wchar_t *errMsg = nullptr;
 
     wchar_t *res
         = g_utf8_to_ucs4(str.c_str(), str.length(), &readed, &writed, &errMsg);
