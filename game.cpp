@@ -177,10 +177,10 @@ class PauseGameCommand : public Command {
         watch->stop();
         Area area;
         area.add(background, false);
-        Font font(L"laudcn2.ttf", 16);
         area.add(new Window(280, 275, 240, 50, L"greenpattern.bmp", 6));
-        area.add(new Label(&font, 280, 275, 240, 50, Label::ALIGN_CENTER,
-                           Label::ALIGN_MIDDLE, 255, 255, 0, msg(L"paused")));
+        area.add(new ManagedLabel(L"laudcn2.ttf", 16, 280, 275, 240, 50,
+                                  Label::ALIGN_CENTER, Label::ALIGN_MIDDLE,
+                                  255, 255, 0, msg(L"paused")));
         area.add(new AnyKeyAccel());
         area.run();
         sound->play(L"click.wav");
