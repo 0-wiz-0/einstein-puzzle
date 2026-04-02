@@ -331,7 +331,7 @@ void showMessageWindow(Area *parentArea, const std::wstring &pattern, int width,
     int x = (screen.getWidth() - width) / 2;
     int y = (screen.getHeight() - height) / 2;
 
-    area.add(parentArea);
+    area.add(parentArea, false);
     area.add(new Window(x, y, width, height, pattern, 6));
     area.add(new Label(font, x, y, width, height, Label::ALIGN_CENTER,
                        Label::ALIGN_MIDDLE, r, g, b, msg));

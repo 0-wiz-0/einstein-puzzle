@@ -256,7 +256,7 @@ class FailCommand : public Command {
         Font font(L"laudcn2.ttf", 24);
         Font btnFont(L"laudcn2.ttf", 14);
         Area area;
-        area.add(gameArea);
+        area.add(gameArea, false);
         area.add(new Window(220, 240, 360, 140, L"redpattern.bmp", 6));
         area.add(new Label(&font, 250, 230, 300, 100, Label::ALIGN_CENTER,
                            Label::ALIGN_MIDDLE, 255, 255, 0, msg(L"lost")));
