@@ -32,6 +32,8 @@ class IconSet {
   public:
     IconSet();
     virtual ~IconSet();
+    IconSet(const IconSet &) = delete;
+    IconSet &operator=(const IconSet &) = delete;
 
   public:
     SDL_Surface *getLargeIcon(int row, int num, bool highlighted);
