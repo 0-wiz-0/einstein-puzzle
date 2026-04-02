@@ -813,11 +813,10 @@ Picture::Picture(int x, int y, const std::wstring &name, bool transparent)
     height = image->h;
 }
 
+/* make a copy of img, does _not_ take ownership of img */
 Picture::Picture(int x, int y, SDL_Surface *img)
     : TileWidget(x, y, img->w, img->h) {
-    image = img;
-    img = SDL_CreateRGBSurface(SDL_SWSURFACE, img->w, img->h, 24, 0x00FF0000,
-                               0x0000FF00, 0x000000FF, 0 /*0xFF000000*/);
+    image = SDL_ConvertSurface(img, img->format, img->flags);
 }
 
 //////////////////////////////////////////////////////////////////
