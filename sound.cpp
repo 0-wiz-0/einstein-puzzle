@@ -44,7 +44,6 @@ Sound::~Sound() {
     for (auto &i : chunkCache) {
         Mix_FreeChunk(i.second);
     }
-    Mix_CloseAudio();
 }
 
 void Sound::play(const std::wstring &name) {
