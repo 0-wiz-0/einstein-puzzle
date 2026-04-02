@@ -82,7 +82,7 @@ static void loadResources(const std::wstring &selfPath) {
 #ifdef __APPLE__
     dirs.push_back(getResourcesPath(selfPath));
 #else
-    dirs.push_back("/usr"
+    dirs.push_back(PREFIX
                    L"/share/einstein/res");
     dirs.push_back(getHomeDir() + L"/.einstein/res");
 #endif
