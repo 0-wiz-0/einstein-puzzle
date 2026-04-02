@@ -118,9 +118,6 @@ int Screen::getHeight() const {
 }
 
 void Screen::setMouseImage(SDL_Surface *image) {
-    SDL_Surface *mouseImage
-        = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_ARGB8888, 0);
-
     if (mouseCursor) {
         SDL_FreeCursor(mouseCursor);
         mouseCursor = nullptr;
@@ -129,6 +126,8 @@ void Screen::setMouseImage(SDL_Surface *image) {
         return;
     }
 
+    SDL_Surface *mouseImage
+        = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_ARGB8888, 0);
     mouseCursor = SDL_CreateColorCursor(mouseImage, 0, 0);
 }
 
