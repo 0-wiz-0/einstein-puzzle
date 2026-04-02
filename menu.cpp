@@ -170,7 +170,6 @@ void menu() {
     Font font(L"laudcn2.ttf", 20);
 
     area.add(new MenuBackground());
-    area.draw();
 
     NewGameCommand newGameCmd(&area);
     area.add(menuButton(340, &font, msg(L"newGame"), &newGameCmd));

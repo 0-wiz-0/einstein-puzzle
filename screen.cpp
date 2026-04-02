@@ -79,7 +79,7 @@ void Screen::applyMode() {
     else {
         window = SDL_CreateWindow("Einstein", SDL_WINDOWPOS_UNDEFINED,
                                   SDL_WINDOWPOS_UNDEFINED, UNSCALED_WIDTH,
-                                  UNSCALED_HEIGHT, flags);
+                                  UNSCALED_HEIGHT, flags | SDL_WINDOW_HIDDEN);
     }
     if (!window) {
         throw Exception(L"Couldn't create window: " + fromMbcs(SDL_GetError()));
@@ -177,6 +177,7 @@ void Screen::flush() {
         // SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, NULL, NULL);
         SDL_RenderPresent(renderer);
+        SDL_ShowWindow(window);
     }
 }
 
