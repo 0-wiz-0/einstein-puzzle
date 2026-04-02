@@ -2,4 +2,4 @@
 ===
 
 - Support SDL2.
-- Add build infrastructure for using CMake.
+- Build infrastructure has switched to CMake.

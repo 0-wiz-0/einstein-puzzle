@@ -1,16 +1,1 @@
-einstein*
-mkres*
-.d
-^\.d$
-*\.o
-*\.exe
-*\.res
-res/
-.*cppcheck.*
-^\.hgignore$
-^depend$
-^testbuild.bat$
-^.vs/einstein-puzzle/v15/ipch/AutoPCH$
-^.vs
-/.cache/
-/compile_commands.json
+build
