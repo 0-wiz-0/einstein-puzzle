@@ -35,6 +35,7 @@ Formatter::Formatter(unsigned char *data, int offset) {
         commandsCnt = argsCnt = 0;
         commands = nullptr;
         args = nullptr;
+        return;
     }
 
     offset += 4;
