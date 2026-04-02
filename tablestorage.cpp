@@ -20,6 +20,7 @@
 
 #include "exceptions.h"
 #include "unicode.h"
+#include "utils.h"
 
 #include <iostream>
 
@@ -53,7 +54,7 @@ TableStorage::~TableStorage() {
 
 std::wstring TableStorage::getFileName() {
 #ifndef WIN32
-    return std::wstring(fromMbcs(getenv("HOME"))) + L"/.einstein/einsteinrc";
+    return getHomeDir() + L"/.einstein/einsteinrc";
 #else
     return L"einstein.cfg";
 #endif

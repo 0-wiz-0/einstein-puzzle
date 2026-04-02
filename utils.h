@@ -58,6 +58,7 @@ void drawBevel(SDL_Surface *s, int left, int top, int width, int height,
                bool raised, int size);
 SDL_Surface *makeBox(int width, int height, const std::wstring &bg);
 void ensureDirExists(const std::wstring &fileName);
+std::wstring getHomeDir();
 int readInt(std::istream &stream);
 std::wstring readString(std::istream &stream);
 void writeInt(std::ostream &stream, int value);

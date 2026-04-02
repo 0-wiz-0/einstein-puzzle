@@ -161,8 +161,7 @@ class SaveCommand : public Command {
 
 static std::wstring getSavesPath() {
 #ifndef WIN32
-    std::wstring path(fromMbcs(getenv("HOME"))
-                      + std::wstring(L"/.einstein/save"));
+    std::wstring path(getHomeDir() + std::wstring(L"/.einstein/save"));
 #else
     TCHAR szPath[MAX_PATH];
     SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT,

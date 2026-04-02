@@ -388,6 +388,14 @@ SDL_Surface *makeBox(int width, int height, const std::wstring &bg) {
 
 // #ifndef WIN32
 
+std::wstring getHomeDir() {
+    const char *home = getenv("HOME");
+    if (!home) {
+        throw Exception(L"HOME environment variable is not set");
+    }
+    return fromMbcs(home);
+}
+
 void ensureDirExists(const std::wstring &fileName) {
     std::string s(toMbcs(fileName));
     struct stat buf;

@@ -84,7 +84,7 @@ static void loadResources(const std::wstring &selfPath) {
 #else
     dirs.push_back("/usr"
                    L"/share/einstein/res");
-    dirs.push_back(fromMbcs(getenv("HOME")) + L"/.einstein/res");
+    dirs.push_back(getHomeDir() + L"/.einstein/res");
 #endif
 #endif
     dirs.push_back(L"res");
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     int argc;
     LPSTR *argv = CommandLineToArgvA(GetCommandLineA(), &argc);
 #else
-    ensureDirExists(fromMbcs(getenv("HOME")) + std::wstring(L"/.einstein"));
+    ensureDirExists(getHomeDir() + std::wstring(L"/.einstein"));
 #endif
 
     try {
