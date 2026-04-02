@@ -39,7 +39,7 @@ class Area;
 
 class Widget {
   protected:
-    Area *area;
+    Area *area = nullptr;
 
   public:
     virtual ~Widget() = default;
