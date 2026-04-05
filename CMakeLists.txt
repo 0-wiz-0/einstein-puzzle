@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(einstein VERSION 2.2 LANGUAGES CXX)
+project(einstein VERSION 2.5 LANGUAGES CXX)
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
